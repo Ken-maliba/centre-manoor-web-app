@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-Inscription en Ligne - Centre Manoor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        /* Styles Généraux */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 0;
+            margin: 0;
+            color: #121212;
+            
+            /* PROPRIÉTÉS DE L'IMAGE DE FOND */
+            min-height: 100vh;
+            background-image: url("{{ url_for('static', filename='centre manoor.jpg') }}");
+            background-size: cover; 
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            background-position: center top;
+            background-color: #f5f2f2; 
+        }
+        
+        html {
+            height: 100%;
+        }
+
+        /* --- STYLES DE L'EN-TÊTE --- */
+        header {
+            background-color: rgba(0, 123, 255, 0.9); 
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky; 
+            top: 0;
+            z-index: 1000;
+        }
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            display: flex; 
+            align-items: center;
+        }
+        .logo img {
+            max-height: 50px; 
+            width: auto;
+            border-radius: 5px; 
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 1em;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #d1e7ff;
+        }
+        .logo-center span { 
+            font-size: 1.8em;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        /* --- FIN DES STYLES DE L'EN-TÊTE --- */
+
+        /* Styles du Contenu Principal */
+        .content-wrapper {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+        /* Conteneurs pour améliorer la lisibilité sur l'image de fond */
+        .content-section { /* Nouvelle classe pour cibler toutes les sections */
+            background-color: rgba(255, 255, 255, 0.9); 
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+        }
+        .form-container, #sommaire-content, #contact {
+            display: none; /* Toutes les sections sont masquées par défaut */
+        }
+
+        /* Styles des boutons de toggle (Formulaire) */
+        #toggleFormulaire {
+            color: white;
+            background-color: #007bff;
+            border: none;
+            padding: 15px 25px;
+            margin: 40px auto 30px auto;
+            display: block;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none; 
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+        }
+        #toggleFormulaire:hover {
+            background-color: #0056b3;
+        }
+        
+        /* Styles pour l'effet de frappe */
+        #typing-effect {
+            border-right: .15em solid white; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            margin: 0;
+            animation: 
+                blink-caret .75s step-end infinite;
+        }
+
+        /* Animation du Curseur */
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: white }
+        }
+        
+        /* Styles de Sous-sections */
+        h1, h2 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #ccc;
+            text-align: left;
+        }
+        h3 {
+            color: #0056b3;
+            margin-top: 25px;
+            border-left: 5px solid #007bff;
+            padding-left: 10px;
+        }
+        
+        /* Styles Spécifiques au Formulaire */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select {
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;
+        }
+        button {
+            width: 100%; background-color: #28a745; color: white; padding: 15px 20px; margin-top: 20px;
+            border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; transition: background-color 0.3s;
+        }
+        button:hover { background-color: #1e7e34; }
+        .info-box {
+            background-color: #e9f7ff; border-left: 5px solid #007bff; padding: 15px; margin-top: 15px;
+            border-radius: 4px; font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-center logo">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo Manoor" width="150"> 
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}" id="navAccueil">Accueil</a>
+            <a href="#" id="toggleSommaire">Sommaire</a>
+            <a href="#">Manoor Shop</a> 
+            <a href="#" id="navToggleContact">Nous Contacter</a> 
+            <a href="{{ url_for('login') }}">Admin Login</a>
+        </nav>
+    </header>
+    
+    <div class="content-wrapper">
+        
+        <h1 id="main-title" style="display: none;"></h1> 
+
+        <a href="#" id="toggleFormulaire">
+            Cliquez ici pour <span id="typing-effect"></span>
+        </a>
+
+        
+        <div id="formulaire-content" class="form-container content-section">
+            <h2>Détails de l'Inscription et Paiement</h2>
+            <form action="/soumettre-inscription" method="POST">
+                
+                <h2>Informations Personnelles</h2>
+                <div class="form-group"><label for="nom">Nom</label><input type="text" id="nom" name="nom" required></div>
+                <div class="form-group"><label for="prenom">Prénom</label><input type="text" id="prenom" name="prenom" required></div>
+                <div class="form-group"><label for="datenaissance">Date de Naissance</label><input type="date" id="datenaissance" name="datenaissance" required></div>
+                <div class="form-group"><label for="telephone">Téléphone (Format 8 chiffres)</label><input type="tel" id="telephone" name="telephone" pattern="[0-9]{8}" maxlength="8" required></div>
+                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" required></div>
+                <div class="form-group">
+                    <label for="niveauetude">Niveau d'Étude Actuel</label>
+                    <select id="niveauetude" name="niveauetude" required>
+                        <option value="">Sélectionnez votre niveau</option>
+                        <option value="">DEF</option>
+                        <option value="Bac">Terminal / Bac</option>
+                        <option value="Bac+1">Bac + 1</option>
+                        <option value="Bac+2">Bac + 2</option>
+                        <option value="Licence">Licence</option>
+                        <option value="Master">Master</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="établissement">Etablissement Actuel</label>
+                    <input type="text" id="établissement">
+                </div>
+
+
+                <h2>Choix de la Formation</h2>
+                <div class="form-group">
+                    <label for="formation">Formation demandée</label>
+                    <select id="formation" name="formation" required>
+                        <option value="">Sélectionnez la formation</option>
+                        <option value="Biologie Médicale/Technicien Labo-Pharmacie">Biologie Médicale/Technicien Labo-Pharmacie niveau DEF et niveau bac</option>
+                        <option value="Infirmier(ère)">Infirmier(ère) d'État (IDE)/Santé Publique</option>
+                        <option value="Obstétrique">Obstétrique (Sage-Femme, Infirmière Obstétricienne)</option>
+                    </select>
+
+                </div>
+                
+                <div class="form-group">
+                    <label for="formation_option">Option de Formation</label>
+                    <select id="formation_option" name="formation_option" required>
+                        <option value="">Sélectionnez une option</option>
+                        <option value="Groupe">Formation en Groupe (Mensualité : 25 000 F CFA)</option>
+                        <option value="Individuelle">Formation Individuelle (Mensualité : 50 000 F CFA)</option>
+                    </select>
+                </div>
+
+                <div class="info-box">
+                    <p>⚠️ **Frais d’Inscription :** **5 000 F CFA** (Ces frais sont obligatoires et uniques).</p>
+                    <p>La mensualité dépendra de l'option choisie ci-dessus (25 000 F CFA ou 50 000 F CFA).</p>
+                </div>
+
+                <h2>Paiement des Frais de Dossier (5 000 F CFA)</h2>
+                <div class="form-group">
+                    <label for="methode_paiement">Méthode de Paiement des Frais de Dossier</label>
+                    <select id="methode_paiement" name="methode_paiement" required>
+                        <option value="">Sélectionnez la méthode</option>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="Transfert Bancaire">Transfert Bancaire</option>
+                        <option value="Sur Place">Paiement sur Place (Centre Manoor)</option>
+                    </select>
+                </div>
+
+                <button type="submit">Valider la Pré-Inscription et Procéder au Paiement (5000 F CFA)</button>
+            </form>
+        </div>
+        
+        <div id="sommaire-content" class="content-section">
+            <h2 style="text-align: left; border-bottom: none; color: #333;">PRÉSENTATION DU CENTRE DE FORMATION MANOOR</h2>
+
+            <h3>CONTEXTE ET JUSTIFICATION</h3>
+            <p>Le secteur de la santé au Mali, comme dans de nombreux pays en développement, fait face à des défis critiques. La prolifération anarchique d’écoles de santé privées, souvent dépourvues de moyens pédagogiques adaptés, a entraîné une baisse alarmante de la qualité des formations. Les conséquences sont tangibles et dramatiques :</p>
+            <ul>
+                <li>Un taux de mortalité maternelle et infantile qui peine à diminuer.</li>
+                <li>Des erreurs de diagnostic récurrentes, mettant en péril des vies humaines.</li>
+                <li>Une méfiance grandissante des populations envers les professionnels de santé.</li>
+            </ul>
+            <p>Dans ce contexte, les bailleurs de fonds hésitent à financer des projets de santé, créant un cercle vicieux où le manque de ressources aggrave la qualité des soins. Pourtant, la santé reste un besoin universel et fondamental. Notre conviction : le problème n’est pas un manque de bonnes volontés, mais un déficit criant de formation pratique et adaptée aux réalités du terrain. C’est pour combler ce vide que le Centre de Perfectionnement en Soins Infirmiers et Obstétricaux a été créé. Nous formons des étudiants et professionnels immédiatement opérationnels, capables de répondre aux urgences sanitaires avec compétence, empathie et rigueur.</p>
+            
+            <h3>NOTRE MISSION ET NOTRE VISION</h3>
+            <p><strong>🔹 Mission</strong><br>Offrir une formation pratique, intensive et d’excellence aux élèves, étudiants et professionnels de santé, afin de renforcer leurs compétences techniques, physiques et psychologiques pour un exercice professionnel sûr et humain.</p>
+            <p><strong>🔹 Vision</strong><br>Devenir la référence incontournable en matière de formation pratique en soins infirmiers et obstétricaux au Mali et en Afrique de l’Ouest, contribuant ainsi à l’amélioration durable des systèmes de santé et du bien-être des populations.</p>
+
+            <h3>NOS CIBLES : Tous les acteurs de la santé en besoin de pratique</h3>
+            <p>Notre centre s’adresse à tous ceux qui souhaitent renforcer leurs compétences pratiques et se préparer aux réalités du terrain :</p>
+            <ul>
+                <li>🎓 Élèves et étudiants des écoles de santé (infirmiers, sages-femmes, techniciens de laboratoire)</li>
+                <li>Étudiants en médecine souhaitant acquérir une expérience clinique solide</li>
+                <li>💼 Professionnels de santé en activité désireux de se perfectionner ou de se réorienter</li>
+            </ul>
+
+            <h3>NOS ACTIVITÉS : du savoir-faire à l’excellence</h3>
+            <h4>✅ Formation pratique intensive</h4>
+            <ul>
+                <li>Techniques de soins infirmiers (pose de perfusions, pansements, gestes d’urgence, etc.)</li>
+                <li>Techniques obstétricales (accouchement, surveillance du postpartum, soins au nouveau-né)</li>
+                <li>Techniques de laboratoire (prélèvements, analyses biologiques, gestion des échantillons)</li>
+            </ul>
+            <h4>✅ Perfectionnement des professionnels</h4>
+            <ul>
+                <li>Modules courts et intensifs adaptés aux besoins spécifiques des structures de santé</li>
+                <li>Recyclage sur les protocoles nationaux et internationaux</li>
+            </ul>
+            <h4>✅ Simulation d’épreuves pratiques</h4>
+            <ul>
+                <li>Préparation aux examens et concours avec des mises en situation réelles</li>
+                <li>Évaluation individualisée et coaching personnalisé</li>
+            </ul>
+            <h4>✅ Placement en stage et en emploi</h4>
+            <ul>
+                <li>Partenariats avec des cliniques, hôpitaux et laboratoires</li>
+                <li>Accompagnement vers l’insertion professionnelle</li>
+            </ul>
+            <h4>✅ Accompagnement administratif</h4>
+            <ul>
+                <li>Aide à la rédaction de CV, préparation aux entretiens, rapport de stage</li>
+            </ul>
+        </div>
+        
+        <div id="contact" class="content-section">
+            <h2 style="text-align: center;">Informations Légales et Coordonnées</h2> 
+            <div style="max-width: 500px; margin: auto; line-height: 1.8;">
+                <p><strong>DENOMINATION :</strong> Centre de Perfectionnement en Soins Infirmiers et Obstétricaux Manoor</p>
+                <p><strong>STATUT JURIDIQUE :</strong> SARL</p>
+                <p><strong>N° NIF :</strong> 086161596C</p>
+                <p><strong>N° NINA :</strong> 42309196892012N</p>
+                <p><strong>RCGM :</strong> MA.BKO.2023.Β.1416</p>
+                <p><strong>ADRESSE :</strong> Yirimadio, derrière le Stade du 26 Mars, Bamako - Mali</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ====================================================
+            // Éléments de la page
+            // ====================================================
+            const sections = document.querySelectorAll('.content-section');
+            const mainTitle = document.getElementById('main-title');
+            const toggleFormulaireButton = document.getElementById('toggleFormulaire');
+            const navAccueil = document.getElementById('navAccueil');
+            const navToggleSommaire = document.getElementById('toggleSommaire');
+            const navToggleContact = document.getElementById('navToggleContact');
+            // Note: Les liens "Manoor Shop" et "Admin Login" ont des liens href par défaut et n'auront pas de contenu local à afficher.
+            
+            // ====================================================
+            // Fonction de Gestion Centrale des Sections
+            // ====================================================
+
+            function showSection(sectionId, titleText) {
+                // 1. Masquer toutes les sections
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // 2. Afficher la section demandée
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                    
+                    // 3. Mettre à jour et afficher le titre principal
+                    mainTitle.textContent = titleText;
+                    mainTitle.style.display = 'block';
+
+                    // 4. MASQUER TOUJOURS le bouton d'accès rapide au formulaire
+                    toggleFormulaireButton.style.display = 'none';
+                    
+                    // Optionnel : Masquer le titre principal si ce n'est pas le formulaire
+                    if (sectionId !== 'formulaire-content') {
+                        mainTitle.style.display = 'none';
+                    }
+
+                    // Défilement vers la nouvelle section
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+                }
+            }
+
+            // ====================================================
+            // 3. Logique du Typing Effect (reste inchangée)
+            // ====================================================
+
+            function typeEffect(elementId, text) {
+                const element = document.getElementById(elementId);
+                let i = 0;
+                
+                function typing() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        setTimeout(typing, 70);
+                    } else {
+                         element.style.borderRight = 'none'; 
+                    }
+                }
+                typing();
+            }
+
+            // Déclenche l'effet de frappe au chargement de la page
+            typeEffect('typing-effect', 'accéder au formulaire');
+
+
+            // ====================================================
+            // 4. Gestion des Clics
+            // ====================================================
+
+            // Liens de Navigation
+            navToggleSommaire.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('sommaire-content', 'Sommaire de Présentation');
+            });
+
+            navToggleContact.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('contact', 'Coordonnées du Centre');
+            });
+            
+            // Bouton principal (Formulaire)
+            toggleFormulaireButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('formulaire-content', 'Formulaire de Pré-Inscription');
+            });
+
+            // Gérer le clic sur "Accueil" (pour revenir à l'état initial)
+            navAccueil.addEventListener('click', function(e) {
+                 // Nous devons empêcher le rechargement par défaut si nous voulons un masquage immédiat
+                 e.preventDefault(); 
+                 
+                 // Masquer toutes les sections
+                 sections.forEach(section => { section.style.display = 'none'; });
+                 
+                 // Masquer le titre principal
+                 mainTitle.style.display = 'none';
+                 
+                 // Afficher le bouton du formulaire pour l'état initial
+                 toggleFormulaireButton.style.display = 'block';
+            });
+
+        });
+    </script>
+</body>
+</html>

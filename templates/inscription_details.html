@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails Inscription #{{ inscription.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 30px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #eee; }
+        .detail-row:last-child { border-bottom: none; }
+        .label { font-weight: bold; color: #555; width: 40%; }
+        .value { width: 60%; text-align: right; }
+        .status-validated { color: green; font-weight: bold; }
+        .status-pending { color: orange; font-weight: bold; }
+        .btn-back { display: inline-block; margin-top: 30px; padding: 10px 15px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; }
+        .btn-validate { background-color: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 5px; text-decoration: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Détails de l'Inscription #{{ inscription.id }}</h1>
+
+        <div class="detail-row">
+            <span class="label">Nom et Prénom :</span>
+            <span class="value">{{ inscription.nom }} {{ inscription.prenom }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Date de Naissance :</span>
+            <span class="value">{{ inscription.datenaissance }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Téléphone :</span>
+            <span class="value">{{ inscription.telephone }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Email :</span>
+            <span class="value">{{ inscription.email }}</span>
+        </div>
+        
+        <div style="border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;"></div>
+        
+        <div class="detail-row">
+            <span class="label">Formation Demandée :</span>
+            <span class="value" style="font-size: 1.1em; font-weight: bold;">{{ inscription.formation }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="label">Option de Formation :</span>
+            <span class="value">{{ inscription.formation_option }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="label">Niveau d'Étude :</span>
+            <span class="value">{{ inscription.niveauetude }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Méthode de Paiement :</span>
+            <span class="value">{{ inscription.methode_paiement }}</span>
+        </div>
+        
+        <div style="border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;"></div>
+
+        <div class="detail-row">
+            <span class="label">Statut de Validation :</span>
+            <span class="value">
+                {% if inscription.is_validated %}
+                    <span class="status-validated">Validé</span> (le {{ inscription.validation_date.strftime('%Y-%m-%d à %H:%M') }})
+                {% else %}
+                    <span class="status-pending">En Attente</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Date de Soumission :</span>
+            <span class="value">{{ inscription.date_soumission.strftime('%Y-%m-%d à %H:%M') }}</span>
+        </div>
+
+        <div style="margin-top: 40px; text-align: right;">
+            {% if not inscription.is_validated %}
+                <a href="{{ url_for('validate_inscription', inscription_id=inscription.id) }}" 
+                    class="btn-validate"
+                    onclick="return confirm('Valider cette inscription et envoyer la notification ?');">
+                    Valider le Dossier
+                </a>
+            {% endif %}
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-back">
+                Retour au Tableau de Bord
+            </a>
+        </div>
+    </div>
+</body>
+</html>

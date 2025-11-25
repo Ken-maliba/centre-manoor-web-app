@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration Centre Manoor</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        
+        .user-header { 
+            text-align: right; 
+            margin-bottom: 25px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-info { font-weight: bold; margin-right: 15px; color: #343a40; }
+        .logout-link { color: #dc3545; text-decoration: none; }
+        .logout-link:hover { text-decoration: underline; }
+        
+        /* Styles du tableau */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f0f8ff; color: #333; }
+        tr:hover { background-color: #f9f9f9; }
+        .validated { color: green; font-weight: bold; }
+        .pending { color: orange; font-weight: bold; }
+        .btn-validate { background-color: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 5px; text-decoration: none; cursor: pointer; transition: background-color 0.3s; }
+        .btn-validate:hover { background-color: #1e7e34; }
+        .date-cell { font-size: 0.9em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="user-header">
+            <span class="user-info">Connecté en tant que : {{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-link">Se Déconnecter</a>
+        </div>
+        
+        <h1>Tableau de Bord Administration (Centre Manoor)</h1>
+        
+        <a href="{{ url_for('export_inscriptions') }}" class="btn-validate" style="float: right; margin-top: -30px; background-color: #17a2b8;">
+            Exporter en CSV (Excel)
+        </a>
+        
+        <p>Total des pré-inscriptions : <strong>{{ inscriptions|length }}</strong></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom Complet</th>
+                    <th>Téléphone</th>
+                    <th>Email</th>
+                    <th>Formation</th>
+                    <th>Option</th> <th>Mode Paiement</th>
+                    <th>Date Soumission</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inscription in inscriptions %}
+                <tr>
+                    <td>{{ inscription.id }}</td>
+                    <td>
+                        <a href="{{ url_for('inscription_details', inscription_id=inscription.id) }}" style="color:#007bff; text-decoration: none; font-weight: bold;">
+                            {{ inscription.nom }} {{ inscription.prenom }}
+                        </a>
+                    </td>
+                    <td>{{ inscription.telephone }}</td>
+                    <td>{{ inscription.email }}</td>
+                    <td>{{ inscription.formation }}</td>
+                    <td>{{ inscription.formation_option }}</td> <td>{{ inscription.methode_paiement }}</td>
+                    <td class="date-cell">{{ inscription.date_soumission.strftime('%Y-%m-%d %H:%M') }}</td>
+                    
+                    <td>
+                        {% if inscription.is_validated %}
+                            <span class="validated">Validé</span>
+                            <div class="date-cell">({{ inscription.validation_date.strftime('%Y-%m-%d') }})</div>
+                        {% else %}
+                            <span class="pending">En Attente</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% if not inscription.is_validated %}
+                            <a href="{{ url_for('validate_inscription', inscription_id=inscription.id) }}" 
+                                class="btn-validate"
+                                onclick="return confirm('Êtes-vous sûr de vouloir valider cette inscription et envoyer la notification ?');">
+                                Valider
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
