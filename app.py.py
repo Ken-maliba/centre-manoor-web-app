@@ -21,8 +21,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'VOTRE_EMAIL_SMTP@gmail.com'  # ⬅️ REMPLACEZ PAR VOTRE EMAIL RÉEL
-app.config['MAIL_PASSWORD'] = 'VOTRE_MOT_DE_PASSE_SMTP'  # ⬅️ REMPLACEZ PAR VOTRE MOT DE PASSE D'APPLICATION
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')  # ⬅️ REMPLACEZ PAR VOTRE EMAIL RÉEL
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')  # ⬅️ REMPLACEZ PAR VOTRE MOT DE PASSE D'APPLICATION
 app.config['MAIL_DEFAULT_SENDER'] = 'Centre Manoor <VOTRE_EMAIL_SMTP@gmail.com>'  # ⬅️ REMPLACEZ PAR VOTRE EMAIL RÉEL
 
 db = SQLAlchemy(app)
