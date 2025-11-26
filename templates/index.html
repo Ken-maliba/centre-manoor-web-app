@@ -167,6 +167,39 @@
             background-color: #e9f7ff; border-left: 5px solid #007bff; padding: 15px; margin-top: 15px;
             border-radius: 4px; font-size: 0.95em;
         }
+
+        /* --- STYLES POUR MOBILES (Petits Écrans < 768px) --- */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column; /* Empiler le logo et la navigation */
+                padding: 10px 15px;
+            }
+
+            .logo-center {
+                margin-bottom: 10px; /* Espace entre le logo et les liens */
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap; /* Permet aux liens de passer à la ligne */
+                justify-content: center;
+                width: 100%;
+            }
+
+            .nav-links a {
+                margin: 5px 10px; /* Espacement ajusté pour mobile */
+                font-size: 0.9em;
+            }
+
+            .content-section {
+                padding: 20px; /* Moins de padding sur mobile */
+            }
+            
+            #toggleFormulaire {
+                font-size: 1.2em; /* Taille de police du bouton ajustée */
+                padding: 12px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -178,8 +211,8 @@
         <nav class="nav-links">
             <a href="{{ url_for('index') }}" id="navAccueil">Accueil</a>
             <a href="#" id="toggleSommaire">Sommaire</a>
-            <a href="https://wa.me/c/22373607241" target="_blank">Manoor Shop</a> 
-            <a href="#" id="navToggleContact">Nous Contacter</a> 
+            <a href="https://wa.me/c/22373607241" target="_blank">Manoor Shop</a> 
+            <a href="#" id="navToggleContact">Nous Contacter</a> 
             <a href="{{ url_for('login') }}">Admin Login</a>
         </nav>
     </header>
@@ -207,8 +240,7 @@
                     <label for="niveauetude">Niveau d'Étude Actuel</label>
                     <select id="niveauetude" name="niveauetude" required>
                         <option value="">Sélectionnez votre niveau</option>
-                        <option value="">DEF</option>
-                        <option value="Bac">Terminal / Bac</option>
+                        <option value="DEF">DEF</option> <option value="Bac">Terminal / Bac</option>
                         <option value="Bac+1">Bac + 1</option>
                         <option value="Bac+2">Bac + 2</option>
                         <option value="Licence">Licence</option>
@@ -217,8 +249,7 @@
                 </div>
                 <div>
                     <label for="établissement">Etablissement Actuel</label>
-                    <input type="text" id="établissement">
-                </div>
+                    <input type="text" id="établissement" name="etablissement_actuel"> </div>
 
 
                 <h2>Choix de la Formation</h2>
@@ -275,8 +306,10 @@
             <p>Dans ce contexte, les bailleurs de fonds hésitent à financer des projets de santé, créant un cercle vicieux où le manque de ressources aggrave la qualité des soins. Pourtant, la santé reste un besoin universel et fondamental. Notre conviction : le problème n’est pas un manque de bonnes volontés, mais un déficit criant de formation pratique et adaptée aux réalités du terrain. C’est pour combler ce vide que le Centre de Perfectionnement en Soins Infirmiers et Obstétricaux a été créé. Nous formons des étudiants et professionnels immédiatement opérationnels, capables de répondre aux urgences sanitaires avec compétence, empathie et rigueur.</p>
             
             <h3>NOTRE MISSION ET NOTRE VISION</h3>
-            <p><strong>🔹 Mission</strong><br>Offrir une formation pratique, intensive et d’excellence aux élèves, étudiants et professionnels de santé, afin de renforcer leurs compétences techniques, physiques et psychologiques pour un exercice professionnel sûr et humain.</p>
-            <p><strong>🔹 Vision</strong><br>Devenir la référence incontournable en matière de formation pratique en soins infirmiers et obstétricaux au Mali et en Afrique de l’Ouest, contribuant ainsi à l’amélioration durable des systèmes de santé et du bien-être des populations.</p>
+            <p><strong>🔹 Mission</strong></p>
+            <p>Offrir une formation pratique, intensive et d’excellence aux élèves, étudiants et professionnels de santé, afin de renforcer leurs compétences techniques, physiques et psychologiques pour un exercice professionnel sûr et humain.</p>
+            <p><strong>🔹 Vision</strong></p>
+            <p>Devenir la référence incontournable en matière de formation pratique en soins infirmiers et obstétricaux au Mali et en Afrique de l’Ouest, contribuant ainsi à l’amélioration durable des systèmes de santé et du bien-être des populations.</p>
 
             <h3>NOS CIBLES : Tous les acteurs de la santé en besoin de pratique</h3>
             <p>Notre centre s’adresse à tous ceux qui souhaitent renforcer leurs compétences pratiques et se préparer aux réalités du terrain :</p>
@@ -340,7 +373,6 @@
             const navAccueil = document.getElementById('navAccueil');
             const navToggleSommaire = document.getElementById('toggleSommaire');
             const navToggleContact = document.getElementById('navToggleContact');
-            // Note: Les liens "Manoor Shop" et "Admin Login" ont des liens href par défaut et n'auront pas de contenu local à afficher.
             
             // ====================================================
             // Fonction de Gestion Centrale des Sections
@@ -421,17 +453,21 @@
 
             // Gérer le clic sur "Accueil" (pour revenir à l'état initial)
             navAccueil.addEventListener('click', function(e) {
-                 // Nous devons empêcher le rechargement par défaut si nous voulons un masquage immédiat
-                 e.preventDefault(); 
-                 
-                 // Masquer toutes les sections
-                 sections.forEach(section => { section.style.display = 'none'; });
-                 
-                 // Masquer le titre principal
-                 mainTitle.style.display = 'none';
-                 
-                 // Afficher le bouton du formulaire pour l'état initial
-                 toggleFormulaireButton.style.display = 'block';
+                // Nous devons empêcher le rechargement par défaut si nous voulons un masquage immédiat
+                // Ceci permet également de gérer le défilement vers le haut s'il y a lieu.
+                e.preventDefault(); 
+                
+                // Masquer toutes les sections
+                sections.forEach(section => { section.style.display = 'none'; });
+                
+                // Masquer le titre principal
+                mainTitle.style.display = 'none';
+                
+                // Afficher le bouton du formulaire pour l'état initial
+                toggleFormulaireButton.style.display = 'block';
+
+                // Remonter en haut de la page pour le meilleur effet "Accueil"
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
         });
