@@ -11,11 +11,20 @@ import csv
 
 app = Flask(__name__)
 
-# --- CONFIGURATION PRINCIPALE ---
+# --- CONFIGURATION PRINCIPALE : CORRECTION PERSISTENCE DB ---
 basedir = os.path.abspath(os.path.dirname(__file__))
-# Utilisez toujours la variable d'environnement pour SECRET_KEY
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete_pour_les_sessions_manoor')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
+
+# 1. Utilisation de la variable d'environnement pour la BDD (PostgreSQL sur Render)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+# 2. Correction nécessaire pour SQLAlchemy : Render utilise 'postgres://', 
+#    mais SQLAlchemy a besoin de 'postgresql://' pour se connecter correctement.
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# 3. Utilisation de PostgreSQL en Prod (via DATABASE_URL) ou SQLite en Dev
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # --- CONFIGURATION D'EMAIL (À MODIFIER) ---
@@ -49,7 +58,11 @@ class Inscription(db.Model):
     telephone = db.Column(db.String(8), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     formation = db.Column(db.String(50), nullable=False)
-    # NOUVEAU : Option de formation (Groupe ou Individuelle)
+    
+    # CORRECTION : Ajout du champ pour l'établissement actuel
+    etablissement_actuel = db.Column(db.String(100), nullable=True)
+    
+    # Option de formation (Groupe ou Individuelle)
     formation_option = db.Column(db.String(50), nullable=False)
     niveauetude = db.Column(db.String(50))
     methode_paiement = db.Column(db.String(50))
@@ -135,7 +148,7 @@ def index():
 @app.route('/soumettre-inscription', methods=['POST'])
 def soumettre_inscription():
     if request.method == 'POST':
-        # 1. Récupération des données du formulaire (formation_option ajoutée)
+        # 1. Récupération des données du formulaire (etablissement_actuel ajouté)
         donnees_formulaire = {
             "nom": request.form.get('nom'),
             "prenom": request.form.get('prenom'),
@@ -143,6 +156,10 @@ def soumettre_inscription():
             "telephone": request.form.get('telephone'),
             "email": request.form.get('email'),
             "formation": request.form.get('formation'),
+            
+            # CORRECTION : Récupération du champ 'etablissement_actuel'
+            "etablissement_actuel": request.form.get('etablissement_actuel'),
+            
             "formation_option": request.form.get('formation_option'),
             "niveauetude": request.form.get('niveauetude'),
             "methode_paiement": request.form.get('methode_paiement')
@@ -157,6 +174,10 @@ def soumettre_inscription():
                 telephone=donnees_formulaire['telephone'],
                 email=donnees_formulaire['email'],
                 formation=donnees_formulaire['formation'],
+                
+                # CORRECTION : Enregistrement du champ
+                etablissement_actuel=donnees_formulaire['etablissement_actuel'],
+                
                 formation_option=donnees_formulaire['formation_option'],
                 niveauetude=donnees_formulaire['niveauetude'],
                 methode_paiement=donnees_formulaire['methode_paiement']
@@ -289,7 +310,7 @@ def export_inscriptions():
 
     csv_header = [
         'ID', 'NOM', 'PRENOM', 'DATE_NAISSANCE', 'TELEPHONE', 'EMAIL',
-        'FORMATION', 'OPTION', 'NIVEAU_ETUDE', 'METHODE_PAIEMENT',
+        'FORMATION', 'OPTION', 'NIVEAU_ETUDE', 'ETABLISSEMENT_ACTUEL', 'METHODE_PAIEMENT', # ETABLISSEMENT AJOUTÉ
         'DATE_SOUMISSION', 'VALIDEE', 'DATE_VALIDATION'
     ]
 
@@ -297,7 +318,7 @@ def export_inscriptions():
     for ins in inscriptions:
         row = [
             ins.id, ins.nom, ins.prenom, ins.datenaissance, ins.telephone, ins.email,
-            ins.formation, ins.formation_option, ins.niveauetude, ins.methode_paiement,
+            ins.formation, ins.formation_option, ins.niveauetude, ins.etablissement_actuel, ins.methode_paiement, # VALEUR AJOUTÉE
             ins.date_soumission.strftime('%Y-%m-%d %H:%M:%S'),
             'OUI' if ins.is_validated else 'NON',
             ins.validation_date.strftime('%Y-%m-%d %H:%M:%S') if ins.validation_date else ''
@@ -320,12 +341,10 @@ def export_inscriptions():
 
 # --- LANCEMENT DU SERVEUR CORRIGÉ ---
 if __name__ == '__main__':
-    # Initialisation de la BDD et de l'utilisateur admin.
-    # Ce bloc ne s'exécute QUE lorsque l'on lance le fichier avec 'python app.py' en local (dev).
-    # Gunicorn (en prod) l'ignore, évitant l'erreur de chargement.
     with app.app_context():
-        db.create_all()
+        # NOTE : Cette ligne crée les tables/l'admin par défaut uniquement 
+        # en mode développement (local) si la BDD est vide.
+        db.create_all() 
         create_default_admin()
         
     app.run(debug=True)
-# FIN DE LA CORRECTION
