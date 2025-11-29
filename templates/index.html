@@ -66,7 +66,7 @@
         .photo-card img {
             width: 100%;
             height: 200px;
-            object-fit: cover; /* Assure que l'image couvre la zone sans déformation */
+            object-fit: cover; /* Assure que l'image couvre la zone sans déformation pour les vignettes */
         }
 
         .card-caption {
@@ -86,7 +86,7 @@
             margin-bottom: 0;
         }
         
-        /* STYLES POUR LA LIGHTBOX / MODAL */
+        /* STYLES POUR LA LIGHTBOX / MODAL (MISE À JOUR FINALE) */
         .modal {
             display: none; /* Masqué par défaut */
             position: fixed;
@@ -95,53 +95,63 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
+            overflow: auto; /* Permet le défilement si le contenu est trop grand */
             background-color: rgba(0, 0, 0, 0.9); /* Fond semi-transparent noir */
             justify-content: center;
             align-items: center;
-            flex-direction: column;
+            flex-direction: column; /* Organise image et légende en colonne */
+            padding: 20px; /* Ajoute un peu de marge autour du contenu */
+            box-sizing: border-box; /* Inclut le padding dans la taille du modal */
         }
 
         .modal-content {
             margin: auto;
-            display: block;
-            width: 90%;
-            max-width: 700px;
+            display: flex; /* Utilise flex pour l'image à l'intérieur */
+            justify-content: center;
+            align-items: center;
+            width: 90%; /* Prend 90% de la largeur du parent */
+            max-width: 900px; /* Augmenté pour des images plus grandes */
+            max-height: 80vh; /* Prend jusqu'à 80% de la hauteur de la fenêtre visible */
             border-radius: 8px;
-            overflow: hidden;
+            overflow: hidden; /* Cache ce qui dépasse */
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
             animation-name: zoom;
             animation-duration: 0.6s;
+            background-color: black; /* Fond noir pour les barres si l'image n'est pas pleine */
         }
 
         .modal-content img {
             width: 100%;
-            height: auto;
+            height: 100%; /* L'image remplit la taille du modal-content */
+            object-fit: contain; /* Conserve les proportions, image entière visible */
             display: block;
         }
 
         .modal-caption {
-            margin: auto;
+            margin: 15px auto 0 auto; /* Marge au-dessus de la légende */
             display: block;
             width: 90%;
-            max-width: 700px;
+            max-width: 900px; /* Correspond au max-width de l'image */
             text-align: center;
-            color: #ccc;
+            color: #eee; /* Légèrement plus clair pour contraste sur fond noir */
             padding: 10px 0;
-            min-height: 40px; /* Espace minimal pour le commentaire */
+            min-height: 40px; 
             font-size: 1.2em;
+            background-color: rgba(0, 0, 0, 0.5); /* Léger fond pour la légende */
+            border-radius: 5px;
         }
 
         /* Le bouton de fermeture (X) */
         .close {
-            position: absolute;
-            top: 15px;
-            right: 35px;
+            position: fixed; /* Fixé par rapport à la fenêtre */
+            top: 20px;
+            right: 40px;
             color: #f1f1f1;
-            font-size: 40px;
+            font-size: 50px; /* Légèrement plus grand */
             font-weight: bold;
             transition: 0.3s;
             cursor: pointer;
+            z-index: 10001; /* Au-dessus de tout */
         }
 
         .close:hover,
