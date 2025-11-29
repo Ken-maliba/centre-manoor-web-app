@@ -15,9 +15,9 @@
         
         /* STYLES DU BODY ET DU FOND D'ÉCRAN */
         body {
-            /* CORRECTION DÉFINITIVE DU NOM DE FICHIER IMAGE */
+            /* UTILISATION DU CHEMIN STATIQUE DIRECT POUR CONTOURNER LES PROBLÈMES DE FLASK/RENDER */
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-                              url("{{ url_for('static', filename='diplomes_manoor.jpg') }}"); 
+                              url("/static/diplomes_manoor.jpg"); 
             
             background-size: cover;
             background-repeat: no-repeat;
@@ -36,7 +36,7 @@
             margin-bottom: 40px;
             position: relative; 
             z-index: 10;
-            color: #333; /* AJOUT : Assure la visibilité du texte */
+            color: #333; /* Assure la visibilité du texte */
         }
         
         /* PIED DE PAGE FIXÉ EN BAS */
@@ -92,7 +92,6 @@
             align-items: center;
             position: relative;
         }
-        /* Masquer l'ancien bouton s'il existe */
         #toggleFormulaire {
             display: none !important;
         }
