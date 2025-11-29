@@ -359,4 +359,48 @@
                     mainTitle.style.display = 'block';
 
                     // 5. Défilement vers l'ancre de la page (où le titre est centré)
-                    homeAnchor.scrollIntoView({ behavior:
+                    homeAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            
+            // --- GESTION DES CLICS ---
+
+            // 1. LIEN INSCRIPTION 
+            navPreInscription.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('formulaire-content', 'Formulaire de Pré-Inscription');
+            });
+
+            // 2. SOMMAIRE
+            navToggleSommaire.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('sommaire-content', 'Sommaire de Présentation');
+            });
+
+            // 3. CONTACT
+            navToggleContact.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('contact', 'Coordonnées du Centre');
+            });
+            
+            // 4. ACCUEIL (Retour à la vue initiale)
+            navAccueil.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                
+                // Masquer toutes les sections
+                sections.forEach(section => { section.style.display = 'none'; });
+                
+                // Masquer le titre principal
+                mainTitle.style.display = 'none';
+                
+                // Montrer l'ancre (pour le centrage du vide)
+                homeAnchor.style.display = 'block'; 
+
+                // Remonter en haut de la page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+        });
+    </script>
+</body>
+</html>
