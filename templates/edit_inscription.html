@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Inscription #{{ inscription.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 30px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+        }
+        .full-width { grid-column: 1 / -1; }
+        .btn-submit { background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; margin-top: 20px; }
+        .btn-submit:hover { background-color: #1e7e34; }
+        .btn-cancel { background-color: #6c757d; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; text-decoration: none; margin-left: 10px; }
+        .btn-cancel:hover { background-color: #5a6268; }
+        .validation-status { margin-top: 20px; padding: 15px; background-color: #f0f8ff; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Modification de l'Inscription #{{ inscription.id }} ({{ inscription.nom }} {{ inscription.prenom }})</h1>
+
+        <form method="POST" action="{{ url_for('edit_inscription', inscription_id=inscription.id) }}" class="form-grid">
+            
+            <div class="form-group">
+                <label for="nom">Nom</label>
+                <input type="text" id="nom" name="nom" value="{{ inscription.nom }}" required>
+            </div>
+            <div class="form-group">
+                <label for="prenom">Prénom</label>
+                <input type="text" id="prenom" name="prenom" value="{{ inscription.prenom }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="datenaissance">Date de Naissance</label>
+                <input type="date" id="datenaissance" name="datenaissance" value="{{ inscription.datenaissance }}" required>
+            </div>
+            <div class="form-group">
+                <label for="telephone">Téléphone (8 Chiffres)</label>
+                <input type="tel" id="telephone" name="telephone" value="{{ inscription.telephone }}" pattern="[0-9]{8}" maxlength="8" required>
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ inscription.email }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="niveauetude">Niveau d'Étude Actuel</label>
+                <select id="niveauetude" name="niveauetude" required>
+                    {% for niveau in ['DEF', 'Bac', 'Bac+1', 'Bac+2', 'Licence', 'Master'] %}
+                        <option value="{{ niveau }}" {% if inscription.niveauetude == niveau %}selected{% endif %}>{{ niveau }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="établissement">Etablissement Actuel</label>
+                <input type="text" id="établissement" name="etablissement_actuel" value="{{ inscription.etablissement_actuel or '' }}"> 
+            </div>
+
+            <div class="form-group full-width">
+                <label for="formation">Formation demandée</label>
+                <select id="formation" name="formation" required>
+                    {% for f in ['Biologie Médicale', 'Infirmier', 'Obstetrique'] %}
+                        <option value="{{ f }}" {% if inscription.formation == f %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Option de Formation</label>
+                <div>
+                    <input type="radio" id="option_groupe" name="formation_option" value="Groupe" {% if inscription.formation_option == 'Groupe' %}checked{% endif %} required>
+                    <label for="option_groupe" style="display: inline;">Formation en Groupe</label><br>
+                    <input type="radio" id="option_individuelle" name="formation_option" value="Individuelle" {% if inscription.formation_option == 'Individuelle' %}checked{% endif %} required>
+                    <label for="option_individuelle" style="display: inline;">Formation Individuelle</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="methode_paiement">Méthode de Paiement (Frais de Dossier)</label>
+                <select id="methode_paiement" name="methode_paiement" required>
+                    {% for mp in ['Orange Money', 'Transfert Bancaire', 'Sur Place'] %}
+                        <option value="{{ mp }}" {% if inscription.methode_paiement == mp %}selected{% endif %}>{{ mp }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group full-width validation-status">
+                <label for="is_validated" style="color: #007bff;">Statut de Validation Actuel</label>
+                <input type="checkbox" id="is_validated" name="is_validated" {% if inscription.is_validated %}checked{% endif %}>
+                <label for="is_validated" style="display: inline; font-weight: normal;">
+                    Marquer comme Validé (Date actuelle : {{ inscription.validation_date.strftime('%Y-%m-%d') if inscription.validation_date else 'Non Validé' }})
+                </label>
+            </div>
+
+            <div class="form-group full-width" style="text-align: right;">
+                <button type="submit" class="btn-submit">Enregistrer les Modifications</button>
+                <a href="{{ url_for('inscription_details', inscription_id=inscription.id) }}" class="btn-cancel">Annuler</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
