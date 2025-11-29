@@ -59,10 +59,8 @@ class Inscription(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     formation = db.Column(db.String(50), nullable=False)
     
-    # CORRECTION : Ajout du champ pour l'établissement actuel
     etablissement_actuel = db.Column(db.String(100), nullable=True)
     
-    # Option de formation (Groupe ou Individuelle)
     formation_option = db.Column(db.String(50), nullable=False)
     niveauetude = db.Column(db.String(50))
     methode_paiement = db.Column(db.String(50))
@@ -89,7 +87,6 @@ class User(UserMixin, db.Model):
 # --- FONCTIONS UTILITAIRES ---
 def send_validation_email(inscription):
     """Envoie un email à l'étudiant après validation par la direction."""
-    # Déterminer les frais de scolarité basés sur l'option
     if inscription.formation_option == 'Groupe':
         mensualite = '25 000 F CFA'
     else:
@@ -148,7 +145,7 @@ def index():
 @app.route('/soumettre-inscription', methods=['POST'])
 def soumettre_inscription():
     if request.method == 'POST':
-        # 1. Récupération des données du formulaire (etablissement_actuel ajouté)
+        # 1. Récupération des données du formulaire
         donnees_formulaire = {
             "nom": request.form.get('nom'),
             "prenom": request.form.get('prenom'),
@@ -157,7 +154,6 @@ def soumettre_inscription():
             "email": request.form.get('email'),
             "formation": request.form.get('formation'),
             
-            # CORRECTION : Récupération du champ 'etablissement_actuel'
             "etablissement_actuel": request.form.get('etablissement_actuel'),
             
             "formation_option": request.form.get('formation_option'),
@@ -175,7 +171,6 @@ def soumettre_inscription():
                 email=donnees_formulaire['email'],
                 formation=donnees_formulaire['formation'],
                 
-                # CORRECTION : Enregistrement du champ
                 etablissement_actuel=donnees_formulaire['etablissement_actuel'],
                 
                 formation_option=donnees_formulaire['formation_option'],
@@ -251,8 +246,10 @@ def login():
 
         if user and user.check_password(password):
             login_user(user)
+            flash("Connexion réussie.", 'success')
             return redirect(url_for('admin_dashboard'))
         else:
+            # Rendre à nouveau le template avec un message d'erreur
             return render_template('login.html', error_message="Nom d'utilisateur ou mot de passe invalide.")
 
     return render_template('login.html')
@@ -262,6 +259,7 @@ def login():
 @login_required
 def logout():
     logout_user()
+    flash("Vous avez été déconnecté.", 'info')
     return redirect(url_for('login'))
 
 
@@ -270,6 +268,7 @@ def logout():
 @login_required
 def admin_dashboard():
     inscriptions = Inscription.query.order_by(Inscription.date_soumission.desc()).all()
+    # Ajout du `flash` pour afficher les messages de succès/erreur du CRUD
     return render_template('admin_dashboard.html', inscriptions=inscriptions)
 
 
@@ -293,10 +292,12 @@ def validate_inscription(inscription_id):
             db.session.commit()
             print(f"✅ Inscription ID {inscription_id} validée dans la BDD.")
             send_validation_email(inscription)
+            flash(f"L'inscription #{inscription_id} de {inscription.nom} a été validée et l'e-mail a été envoyé.", 'success')
 
         except Exception as e:
             db.session.rollback()
             print(f"❌ ERREUR lors de la validation: {e}")
+            flash(f"Erreur lors de la validation: {e}", 'danger')
 
     return redirect(url_for('admin_dashboard'))
 
@@ -310,7 +311,7 @@ def export_inscriptions():
 
     csv_header = [
         'ID', 'NOM', 'PRENOM', 'DATE_NAISSANCE', 'TELEPHONE', 'EMAIL',
-        'FORMATION', 'OPTION', 'NIVEAU_ETUDE', 'ETABLISSEMENT_ACTUEL', 'METHODE_PAIEMENT', # ETABLISSEMENT AJOUTÉ
+        'FORMATION', 'OPTION', 'NIVEAU_ETUDE', 'ETABLISSEMENT_ACTUEL', 'METHODE_PAIEMENT',
         'DATE_SOUMISSION', 'VALIDEE', 'DATE_VALIDATION'
     ]
 
@@ -318,7 +319,7 @@ def export_inscriptions():
     for ins in inscriptions:
         row = [
             ins.id, ins.nom, ins.prenom, ins.datenaissance, ins.telephone, ins.email,
-            ins.formation, ins.formation_option, ins.niveauetude, ins.etablissement_actuel, ins.methode_paiement, # VALEUR AJOUTÉE
+            ins.formation, ins.formation_option, ins.niveauetude, ins.etablissement_actuel, ins.methode_paiement,
             ins.date_soumission.strftime('%Y-%m-%d %H:%M:%S'),
             'OUI' if ins.is_validated else 'NON',
             ins.validation_date.strftime('%Y-%m-%d %H:%M:%S') if ins.validation_date else ''
@@ -339,11 +340,76 @@ def export_inscriptions():
     return response
 
 
+# --- NOUVELLES ROUTES CRUD (Modifier/Supprimer) ---
+
+@app.route('/admin/edit/<int:inscription_id>', methods=['GET', 'POST'])
+@login_required
+def edit_inscription(inscription_id):
+    inscription = Inscription.query.get_or_404(inscription_id)
+
+    if request.method == 'POST':
+        # Traitement de la soumission du formulaire d'édition
+        try:
+            inscription.nom = request.form.get('nom')
+            inscription.prenom = request.form.get('prenom')
+            inscription.datenaissance = request.form.get('datenaissance')
+            inscription.telephone = request.form.get('telephone')
+            inscription.email = request.form.get('email')
+            inscription.formation = request.form.get('formation')
+            inscription.etablissement_actuel = request.form.get('etablissement_actuel')
+            inscription.formation_option = request.form.get('formation_option')
+            inscription.niveauetude = request.form.get('niveauetude')
+            inscription.methode_paiement = request.form.get('methode_paiement')
+            
+            # Gestion du statut de validation
+            is_validated_form = request.form.get('is_validated') == 'on'
+            
+            if is_validated_form and not inscription.is_validated:
+                # Validation manuelle
+                inscription.is_validated = True
+                inscription.validation_date = datetime.now()
+            elif not is_validated_form and inscription.is_validated:
+                # Dévalidation manuelle
+                inscription.is_validated = False
+                inscription.validation_date = None
+
+
+            db.session.commit()
+            flash(f"L'inscription ID {inscription_id} a été mise à jour.", 'success')
+            return redirect(url_for('inscription_details', inscription_id=inscription.id))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la modification : {e}", 'danger')
+            print(f"❌ ERREUR LORS DE LA MODIFICATION : {e}")
+            return redirect(url_for('edit_inscription', inscription_id=inscription.id))
+
+    # Affichage du formulaire de modification (méthode GET)
+    return render_template('edit_inscription.html', inscription=inscription)
+
+
+@app.route('/admin/delete/<int:inscription_id>', methods=['POST'])
+@login_required
+def delete_inscription(inscription_id):
+    inscription = Inscription.query.get_or_404(inscription_id)
+    nom_complet = f"{inscription.nom} {inscription.prenom}"
+    
+    try:
+        db.session.delete(inscription)
+        db.session.commit()
+        flash(f"L'inscription de {nom_complet} (ID {inscription_id}) a été supprimée définitivement.", 'warning')
+        print(f"🗑️ Inscription ID {inscription_id} supprimée par {current_user.username}")
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression: {e}", 'danger')
+        print(f"❌ ERREUR LORS DE LA SUPPRESSION : {e}")
+
+    return redirect(url_for('admin_dashboard'))
+
 # --- LANCEMENT DU SERVEUR CORRIGÉ ---
 if __name__ == '__main__':
     with app.app_context():
-        # NOTE : Cette ligne crée les tables/l'admin par défaut uniquement 
-        # en mode développement (local) si la BDD est vide.
         db.create_all() 
         create_default_admin()
         
