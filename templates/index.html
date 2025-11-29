@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pré-Inscription en Ligne - Centre Manoor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
@@ -15,7 +13,7 @@
         
         /* STYLES DU BODY ET DU FOND D'ÉCRAN */
         body {
-            /* NOM DE L'IMAGE À VÉRIFIER : Utilisation du nom de votre dernier upload */
+            /* L'image de fond est définie ici. */
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
                               url("{{ url_for('static', filename='IMG-20251128-WA0041.jpg') }}"); 
             background-size: cover;
@@ -33,7 +31,6 @@
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             margin-bottom: 40px;
-            /* Correction: Assure une position standard et une bonne profondeur */
             position: relative; 
             z-index: 10;
         }
@@ -79,21 +76,19 @@
             margin-top: 20px; 
             margin-bottom: 20px; 
             padding: 10px;
-            background-color: rgba(255, 255, 255, 0.9); /* Ajout d'un fond pour la lisibilité */
+            background-color: rgba(255, 255, 255, 0.9); 
             border-radius: 5px;
         }
         
-        /* CORRECTION CRUCIALE : Réactiver la zone du gros bouton mais la masquer */
+        /* Zone d'ancrage pour le titre initial */
         #home-anchor {
-            /* Simule la hauteur de l'ancien bouton pour que le titre `#main-title` soit bien centré 
-               avant qu'une section ne soit affichée. */
             height: 250px; 
-            display: flex;
+            display: flex; /* Assure que le fond reste bien étendu */
             justify-content: center;
             align-items: center;
             position: relative;
         }
-        /* Masquer l'ancien bouton s'il existe (pour le cas où il aurait été réintroduit) */
+        /* Masquer l'ancien bouton s'il existe */
         #toggleFormulaire {
             display: none !important;
         }
@@ -309,7 +304,7 @@
             
             // L'élément qui déclenche l'affichage du formulaire
             const navPreInscription = document.getElementById('navPreInscription');
-            const homeAnchor = document.getElementById('home-anchor'); // NOUVEL ÉLÉMENT
+            const homeAnchor = document.getElementById('home-anchor'); 
 
             const navAccueil = document.getElementById('navAccueil');
             const navToggleSommaire = document.getElementById('toggleSommaire');
@@ -341,13 +336,9 @@
                 sections.forEach(section => {
                     section.style.display = 'none';
                 });
-                // 2. Cacher/Afficher l'ancre de la page d'accueil si nécessaire
-                if (sectionId === 'formulaire-content' || sectionId === 'sommaire-content' || sectionId === 'contact') {
-                    homeAnchor.style.display = 'block'; // Afficher l'ancre pour positionner le titre
-                } else {
-                    homeAnchor.style.display = 'block'; // Laisser l'ancre pour centrer le titre
-                }
-
+                
+                // 2. Afficher l'ancre (pour le centrage du titre)
+                homeAnchor.style.display = 'flex'; 
 
                 // 3. Afficher la section demandée
                 const targetSection = document.getElementById(sectionId);
@@ -393,8 +384,8 @@
                 // Masquer le titre principal
                 mainTitle.style.display = 'none';
                 
-                // Montrer l'ancre (pour le centrage du vide)
-                homeAnchor.style.display = 'block'; 
+                // Laisser l'ancre visible (le display: flex; est important ici)
+                homeAnchor.style.display = 'flex'; 
 
                 // Remonter en haut de la page
                 window.scrollTo({ top: 0, behavior: 'smooth' });
