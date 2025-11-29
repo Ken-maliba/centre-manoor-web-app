@@ -29,13 +29,14 @@
 
         /* Styles pour les sections de contenu (formulaire, sommaire, contact) */
         .content-section {
-            background-color: rgba(255, 255, 255, 0.95); 
+            background-color: rgba(255, 255, 255, 0.95); /* Fond blanc très opaque */
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             margin-bottom: 40px;
             position: relative; 
             z-index: 10;
+            color: #333; /* AJOUT : Assure la visibilité du texte */
         }
         
         /* PIED DE PAGE FIXÉ EN BAS */
@@ -345,7 +346,7 @@
                 // 3. Afficher la section demandée
                 const targetSection = document.getElementById(sectionId);
                 if (targetSection) {
-                    // S'ASSURER QUE LA SECTION EST AFFICHÉE
+                    // C'EST CETTE LIGNE QUI FAIT APPARAÎTRE LE CONTENU
                     targetSection.style.display = 'block';
                     
                     // 4. Mettre à jour et afficher le titre principal
