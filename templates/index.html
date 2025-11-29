@@ -56,6 +56,7 @@
             width: 100%;
             max-width: 300px; /* Taille maximale pour chaque carte */
             transition: transform 0.3s;
+            cursor: pointer; /* Indique que la carte est cliquable */
         }
 
         .photo-card:hover {
@@ -83,6 +84,77 @@
             color: #555;
             font-size: 0.9em;
             margin-bottom: 0;
+        }
+        
+        /* STYLES POUR LA LIGHTBOX / MODAL */
+        .modal {
+            display: none; /* Masqué par défaut */
+            position: fixed;
+            z-index: 10000; /* Assurez-vous qu'il est au-dessus de tout */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9); /* Fond semi-transparent noir */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .modal-caption {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            min-height: 40px; /* Espace minimal pour le commentaire */
+            font-size: 1.2em;
+        }
+
+        /* Le bouton de fermeture (X) */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Animation pour l'ouverture */
+        @keyframes zoom {
+            from {transform: scale(0.1)} 
+            to {transform: scale(1)}
         }
         
         /* PIED DE PAGE FIXÉ EN BAS */
@@ -181,7 +253,9 @@
             
             <div class="gallery-container">
                 
-                <div class="photo-card">
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='diplomes_manoor.jpg') }}"
+                     data-caption="Félicitations aux diplômées ! Une nouvelle promotion de professionnelles de santé prêtes à servir la communauté.">
                     <img src="{{ url_for('static', filename='diplomes_manoor.jpg') }}" alt="Remise de Diplômes">
                     <div class="card-caption">
                         <h4>Félicitations aux Diplômées !</h4>
@@ -189,7 +263,9 @@
                     </div>
                 </div>
 
-                <div class="photo-card">
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='labo_pratique_1.jpg') }}"
+                     data-caption="Maîtriser les tests de laboratoire pour un diagnostic précis, une étape essentielle de la formation.">
                     <img src="{{ url_for('static', filename='labo_pratique_1.jpg') }}" alt="Biologie Médicale">
                     <div class="card-caption">
                         <h4>Pratique en Biologie Médicale</h4>
@@ -197,7 +273,9 @@
                     </div>
                 </div>
                 
-                <div class="photo-card">
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='soins_urgence.jpg') }}"
+                     data-caption="Apprentissage pratique des gestes de premiers secours et de la Réanimation Cardio-Pulmonaire (RCP).">
                     <img src="{{ url_for('static', filename='soins_urgence.jpg') }}" alt="Formation aux Soins d'Urgence">
                     <div class="card-caption">
                         <h4>Formation aux Soins d'Urgence</h4>
@@ -205,11 +283,53 @@
                     </div>
                 </div>
                 
-                <div class="photo-card">
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='soins_infirmiers.jpg') }}"
+                     data-caption="Perfectionnement des techniques d'injection et de soins infirmiers, sous la supervision des formateurs.">
                     <img src="{{ url_for('static', filename='soins_infirmiers.jpg') }}" alt="Techniques de Soins">
                     <div class="card-caption">
                         <h4>Ateliers de Soins Infirmiers</h4>
                         <p>Perfectionnement des techniques d'injection et de soins infirmiers, sous la supervision des formateurs.</p>
+                    </div>
+                </div>
+
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='controle_tension.jpg') }}"
+                     data-caption="Consultation Médicale : Prise de tension et suivi patient, l'empathie au cœur des soins.">
+                    <img src="{{ url_for('static', filename='controle_tension.jpg') }}" alt="Contrôle de tension">
+                    <div class="card-caption">
+                        <h4>Consultation Médicale</h4>
+                        <p>Nos étudiants apprennent les gestes essentiels, comme la prise de tension, avec professionnalisme et bienveillance.</p>
+                    </div>
+                </div>
+
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='microscope_labo.jpg') }}"
+                     data-caption="Analyses en Laboratoire : Concentration et précision pour des diagnostics fiables sous le microscope.">
+                    <img src="{{ url_for('static', filename='microscope_labo.jpg') }}" alt="Utilisation du microscope en laboratoire">
+                    <div class="card-caption">
+                        <h4>Analyses en Laboratoire</h4>
+                        <p>Nos futurs techniciens maîtrisent l'utilisation du microscope pour des analyses précises et des diagnostics fiables.</p>
+                    </div>
+                </div>
+
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='prelevement_sanguin.jpg') }}"
+                     data-caption="Préparation au Soin : Maîtrise des techniques de prélèvement pour des analyses essentielles.">
+                    <img src="{{ url_for('static', filename='prelevement_sanguin.jpg') }}" alt="Préparation d'une injection">
+                    <div class="card-caption">
+                        <h4>Préparation au Soin</h4>
+                        <p>La précision du geste : une étape fondamentale dans l'apprentissage des prélèvements et injections.</p>
+                    </div>
+                </div>
+
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='futur_professionnel.jpg') }}"
+                     data-caption="Future Génération de Soignants : Un avenir prometteur pour nos étudiants, souriants et dévoués.">
+                    <img src="{{ url_for('static', filename='futur_professionnel.jpg') }}" alt="Jeune professionnel de la santé souriant">
+                    <div class="card-caption">
+                        <h4>Future Génération</h4>
+                        <p>Nos étudiants représentent l'avenir de la santé : souriants, compétents et prêts à faire la différence.</p>
                     </div>
                 </div>
                 
@@ -379,6 +499,17 @@
 
     </div>
     
+    <div id="imageModal" class="modal">
+        
+        <span class="close" id="closeModal">&times;</span>
+
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Image agrandie">
+        </div>
+        
+        <div id="modalCaption" class="modal-caption"></div>
+    </div>
+    
     <footer>
         <div class="container">
             <p>&copy; 2023 Centre Manoor. Tous droits réservés.</p>
@@ -389,7 +520,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             
             // ====================================================
-            // Éléments de la page
+            // Éléments de la page (Navigation)
             // ====================================================
             const sections = document.querySelectorAll('.content-section');
             const mainTitle = document.getElementById('main-title');
@@ -405,7 +536,7 @@
             const menuToggle = document.querySelector('.menu-toggle');
             const navMenu = document.getElementById('nav-menu');
             
-            // NOUVEAU: Référence à la galerie
+            // Référence à la galerie
             const gallerySection = document.getElementById('gallery-section');
 
             // LOGIQUE DE LA NAVIGATION MOBILE
@@ -431,7 +562,7 @@
                     section.style.display = 'none';
                 });
                 
-                // NOUVEAU: Masquer la galerie
+                // Masquer la galerie
                 gallerySection.style.display = 'none';
 
                 // 2. Afficher l'ancre pour centrer le titre
@@ -453,25 +584,25 @@
             
             // --- GESTION DES CLICS ---
 
-            // 1. LIEN INSCRIPTION (Affiche la div ID: formulaire-content)
+            // 1. LIEN INSCRIPTION
             navPreInscription.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('formulaire-content', 'Formulaire de Pré-Inscription');
             });
 
-            // 2. SOMMAIRE (Affiche la div ID: sommaire-content)
+            // 2. SOMMAIRE
             navToggleSommaire.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('sommaire-content', 'Sommaire de Présentation');
             });
 
-            // 3. CONTACT (Affiche la div ID: contact)
+            // 3. CONTACT
             navToggleContact.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('contact', 'Coordonnées du Centre');
             });
             
-            // 4. ACCUEIL (Retour à la vue initiale)
+            // 4. ACCUEIL
             navAccueil.addEventListener('click', function(e) {
                 e.preventDefault(); 
                 
@@ -479,13 +610,65 @@
                 mainTitle.style.display = 'none';
                 homeAnchor.style.display = 'flex'; 
 
-                // NOUVEAU : Afficher la galerie
+                // Afficher la galerie
                 gallerySection.style.display = 'block'; 
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
+            
+            // ====================================================
+            // LOGIQUE DU MODAL / LIGHTBOX
+            // ====================================================
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalCaption = document.getElementById('modalCaption');
+            const closeModal = document.getElementById('closeModal');
+            // CIBLE PRINCIPALE : toutes les cartes photos
+            const photoCards = document.querySelectorAll('.photo-card'); 
 
-        });
+            // 1. Gérer l'ouverture du modal au clic sur une carte
+            photoCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Récupérer les données stockées dans les attributs data-
+                    const imgSrc = this.getAttribute('data-src');
+                    const imgCaption = this.getAttribute('data-caption');
+                    
+                    // Vérification de sécurité avant l'affichage
+                    if (modal && modalImage) {
+                        modal.style.display = 'flex'; // Afficher le modal (en mode flex pour centrer)
+                        modalImage.src = imgSrc;
+                        modalCaption.textContent = imgCaption;
+                        // Empêcher le défilement de la page derrière le modal
+                        document.body.style.overflow = 'hidden'; 
+                    }
+                });
+            });
+
+            // 2. Gérer la fermeture au clic sur le 'X'
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Rétablir le défilement
+                });
+            }
+
+            // 3. Gérer la fermeture au clic en dehors de l'image
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Rétablir le défilement
+                }
+            });
+            
+            // 4. Gérer la fermeture avec la touche ECHAP
+            document.addEventListener('keydown', function(event) {
+                if (event.key === "Escape" && modal && modal.style.display === 'flex') {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Rétablir le défilement
+                }
+            });
+
+        }); // FIN DE document.addEventListener('DOMContentLoaded', function()
     </script>
 </body>
 </html>
