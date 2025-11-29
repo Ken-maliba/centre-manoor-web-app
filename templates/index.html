@@ -13,7 +13,7 @@
             --color-secondary: #ff6347; 
         }
         
-        /* 1. STYLES DU BODY ET DU FOND D'ÉCRAN */
+        /* STYLES DU BODY ET DU FOND D'ÉCRAN */
         body {
             /* NOM DE L'IMAGE À VÉRIFIER : Utilisation du nom de votre dernier upload */
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
@@ -33,9 +33,12 @@
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             margin-bottom: 40px;
+            /* Correction: Assure une position standard et une bonne profondeur */
+            position: relative; 
+            z-index: 10;
         }
         
-        /* 2. PIED DE PAGE FIXÉ EN BAS */
+        /* PIED DE PAGE FIXÉ EN BAS */
         footer {
             width: 100%;
             background-color: #121212; 
@@ -55,7 +58,7 @@
             padding-top: 20px; 
         }
         
-        /* 3. STYLES DU BOUTON D'INSCRIPTION DANS LA NAVIGATION */
+        /* STYLES DU BOUTON D'INSCRIPTION DANS LA NAVIGATION */
         .nav-button a {
             background-color: var(--color-secondary); 
             color: white !important;
@@ -71,15 +74,28 @@
             background-color: #d1513a; 
         }
 
-        /* L'ancien bouton central est complètement masqué */
-        #toggleFormulaire {
-            display: none !important;
+        /* Le titre principal qui apparaît en haut des sections */
+        #main-title {
+            margin-top: 20px; 
+            margin-bottom: 20px; 
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9); /* Ajout d'un fond pour la lisibilité */
+            border-radius: 5px;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 0 15px;
+        /* CORRECTION CRUCIALE : Réactiver la zone du gros bouton mais la masquer */
+        #home-anchor {
+            /* Simule la hauteur de l'ancien bouton pour que le titre `#main-title` soit bien centré 
+               avant qu'une section ne soit affichée. */
+            height: 250px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        /* Masquer l'ancien bouton s'il existe (pour le cas où il aurait été réintroduit) */
+        #toggleFormulaire {
+            display: none !important;
         }
         
     </style>
@@ -109,7 +125,9 @@
 
     <div class="container section-padded">
         
-        <h1 id="main-title" style="display: none; text-align: center; color: var(--color-primary);"></h1> 
+        <div id="home-anchor">
+             <h1 id="main-title" style="display: none; text-align: center; color: var(--color-primary);"></h1> 
+        </div>
 
         <div id="formulaire-content" class="content-section" style="display: none;">
             <h2 style="text-align: center; color: var(--color-primary);">Formulaire de Pré-Inscription</h2>
@@ -291,7 +309,8 @@
             
             // L'élément qui déclenche l'affichage du formulaire
             const navPreInscription = document.getElementById('navPreInscription');
-            
+            const homeAnchor = document.getElementById('home-anchor'); // NOUVEL ÉLÉMENT
+
             const navAccueil = document.getElementById('navAccueil');
             const navToggleSommaire = document.getElementById('toggleSommaire');
             const navToggleContact = document.getElementById('navToggleContact');
@@ -305,7 +324,6 @@
                 navMenu.classList.toggle('active');
             });
             
-            // Fermer le menu après le clic sur un lien (sur mobile)
             navMenu.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', function() {
                     if (window.innerWidth <= 768) {
@@ -319,60 +337,26 @@
             // ====================================================
 
             function showSection(sectionId, titleText) {
-                // Masquer toutes les sections
+                // 1. Masquer toutes les sections
                 sections.forEach(section => {
                     section.style.display = 'none';
                 });
+                // 2. Cacher/Afficher l'ancre de la page d'accueil si nécessaire
+                if (sectionId === 'formulaire-content' || sectionId === 'sommaire-content' || sectionId === 'contact') {
+                    homeAnchor.style.display = 'block'; // Afficher l'ancre pour positionner le titre
+                } else {
+                    homeAnchor.style.display = 'block'; // Laisser l'ancre pour centrer le titre
+                }
 
-                // Afficher la section demandée
+
+                // 3. Afficher la section demandée
                 const targetSection = document.getElementById(sectionId);
                 if (targetSection) {
                     targetSection.style.display = 'block';
                     
-                    // Mettre à jour et afficher le titre principal
+                    // 4. Mettre à jour et afficher le titre principal
                     mainTitle.textContent = titleText;
                     mainTitle.style.display = 'block';
 
-                    // Défilement vers le haut de la nouvelle section
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-                }
-            }
-            
-            // --- GESTION DES CLICS ---
-
-            // 1. LIEN INSCRIPTION 
-            navPreInscription.addEventListener('click', function(e) {
-                e.preventDefault();
-                showSection('formulaire-content', 'Formulaire de Pré-Inscription');
-            });
-
-            // 2. SOMMAIRE
-            navToggleSommaire.addEventListener('click', function(e) {
-                e.preventDefault();
-                showSection('sommaire-content', 'Sommaire de Présentation');
-            });
-
-            // 3. CONTACT
-            navToggleContact.addEventListener('click', function(e) {
-                e.preventDefault();
-                showSection('contact', 'Coordonnées du Centre');
-            });
-            
-            // 4. ACCUEIL (Retour à la vue initiale)
-            navAccueil.addEventListener('click', function(e) {
-                e.preventDefault(); 
-                
-                // Masquer toutes les sections
-                sections.forEach(section => { section.style.display = 'none'; });
-                
-                // Masquer le titre principal
-                mainTitle.style.display = 'none';
-                
-                // Remonter en haut de la page
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
-        });
-    </script>
-</body>
-</html>
+                    // 5. Défilement vers l'ancre de la page (où le titre est centré)
+                    homeAnchor.scrollIntoView({ behavior:
