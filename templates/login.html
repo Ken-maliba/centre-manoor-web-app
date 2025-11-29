@@ -3,30 +3,627 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Admin | Centre Manoor</title>
+    <title>Pré-Inscription en Ligne - Centre Manoor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
     <style>
-        body { font-family: Arial, sans-serif; background-color: #007bff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
-        h1 { color: #333; margin-bottom: 30px; }
-        input[type="text"], input[type="password"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; background-color: #007bff; color: white; padding: 14px 20px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; transition: background-color 0.3s; }
-        button:hover { background-color: #0056b3; }
-        .error-message { color: #ff6347; margin-bottom: 20px; font-weight: bold; }
+        /* Définition des couleurs */
+        :root {
+            --color-primary: #007bff; 
+            --color-secondary: #ff6347; 
+        }
+        
+        /* STYLES DU BODY ET DU FOND D'ÉCRAN */
+        body {
+            /* CHEMIN STATIQUE DIRECT */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                              url("/static/diplomes_manoor.jpg"); 
+            
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center top;
+            background-color: #121212; 
+            min-height: 100vh;
+        }
+
+        /* Styles pour les sections de contenu (formulaire, sommaire, contact) */
+        .content-section {
+            background-color: rgba(255, 255, 255, 0.95); /* Fond blanc très opaque */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+            position: relative; 
+            z-index: 10;
+            color: #333; /* Assure la visibilité du texte */
+        }
+        
+        /* NOUVEAUX STYLES POUR LA GALERIE/TEMOIGNAGES SUR LA PAGE D'ACCUEIL */
+        .gallery-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap; /* Permet aux cartes de passer à la ligne sur mobile */
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .photo-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 300px; /* Taille maximale pour chaque carte */
+            transition: transform 0.3s;
+            cursor: pointer; /* Indique que la carte est cliquable */
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px); /* Effet léger au survol */
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover; /* Assure que l'image couvre la zone sans déformation */
+        }
+
+        .card-caption {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-caption h4 {
+            color: var(--color-primary);
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+
+        .card-caption p {
+            color: #555;
+            font-size: 0.9em;
+            margin-bottom: 0;
+        }
+        
+        /* STYLES POUR LA LIGHTBOX / MODAL */
+        .modal {
+            display: none; /* Masqué par défaut */
+            position: fixed;
+            z-index: 10000; /* Assurez-vous qu'il est au-dessus de tout */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9); /* Fond semi-transparent noir */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .modal-caption {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            min-height: 40px; /* Espace minimal pour le commentaire */
+            font-size: 1.2em;
+        }
+
+        /* Le bouton de fermeture (X) */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Animation pour l'ouverture */
+        @keyframes zoom {
+            from {transform: scale(0.1)} 
+            to {transform: scale(1)}
+        }
+        
+        /* PIED DE PAGE FIXÉ EN BAS */
+        footer {
+            width: 100%;
+            background-color: #121212; 
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            z-index: 1000; 
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Marge pour éviter que le contenu ne soit caché par le footer */
+        .container.section-padded {
+            padding-bottom: 70px; 
+            padding-top: 20px; 
+        }
+        
+        /* STYLES DU BOUTON D'INSCRIPTION DANS LA NAVIGATION */
+        .nav-button a {
+            background-color: var(--color-secondary); 
+            color: white !important;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            line-height: 1.5; 
+            display: inline-block;
+        }
+        
+        .nav-button a:hover {
+            background-color: #d1513a; 
+        }
+
+        /* Le titre principal qui apparaît en haut des sections */
+        #main-title {
+            margin-top: 20px; 
+            margin-bottom: 20px; 
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9); 
+            border-radius: 5px;
+        }
+        
+        /* Zone d'ancrage pour le titre initial */
+        #home-anchor {
+            height: 250px; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #toggleFormulaire {
+            display: none !important;
+        }
+        
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h1>Connexion Administration</h1>
 
-        {% if error_message %}
-            <p class="error-message">{{ error_message }}</p>
-        {% endif %}
+    <header>
+        <div class="container">
+            <a href="#" class="logo">
+                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo Manoor" style="max-height: 50px; width: auto; border-radius: 5px;"> 
+            </a>
+            <nav id="nav-menu">
+                <ul>
+                    <li><a href="{{ url_for('index') }}" id="navAccueil">Accueil</a></li>
+                    <li><a href="#" id="toggleSommaire">Sommaire</a></li>
+                    
+                    <li class="nav-button"><a href="#" id="navPreInscription">S'inscrire !</a></li> 
+                    
+                    <li><a href="https://wa.me/c/22373607241" target="_blank">Manoor Shop</a></li>
+                    <li><a href="#" id="navToggleContact">Nous Contacter</a></li>
+                    <li><a href="{{ url_for('login') }}">Admin Login</a></li>
+                </ul>
+            </nav>
+            <button class="menu-toggle" aria-label="Toggle Navigation">☰</button>
+        </div>
+    </header>
 
-        <form method="POST" action="{{ url_for('login') }}">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
-            <button type="submit">Se connecter</button>
-        </form>
+    <div class="container section-padded">
+        
+        <div id="home-anchor">
+             <h1 id="main-title" style="display: none; text-align: center; color: var(--color-primary);"></h1> 
+        </div>
+        
+        <div id="gallery-section" class="content-section" style="background-color: transparent; box-shadow: none;">
+            
+            <h2 style="text-align: center; color: white; background-color: rgba(0, 0, 0, 0.4); padding: 10px; border-radius: 5px; margin-bottom: 30px;">
+                Témoignages et Réalisations du Centre
+            </h2>
+            
+            <div class="gallery-container">
+                
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='diplomes_manoor.jpg') }}"
+                     data-caption="Félicitations aux diplômées ! Une nouvelle promotion de professionnelles de santé prêtes à servir la communauté.">
+                    <img src="{{ url_for('static', filename='diplomes_manoor.jpg') }}" alt="Remise de Diplômes">
+                    <div class="card-caption">
+                        <h4>Félicitations aux Diplômées !</h4>
+                        <p>Une nouvelle promotion de professionnelles de santé prêtes à servir la communauté avec compétence et rigueur.</p>
+                    </div>
+                </div>
+
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='labo_pratique_1.jpg') }}"
+                     data-caption="Maîtriser les tests de laboratoire pour un diagnostic précis, une étape essentielle de la formation.">
+                    <img src="{{ url_for('static', filename='labo_pratique_1.jpg') }}" alt="Biologie Médicale">
+                    <div class="card-caption">
+                        <h4>Pratique en Biologie Médicale</h4>
+                        <p>Maîtriser les tests de laboratoire pour un diagnostic précis, une étape essentielle de la formation.</p>
+                    </div>
+                </div>
+                
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='soins_urgence.jpg') }}"
+                     data-caption="Apprentissage pratique des gestes de premiers secours et de la Réanimation Cardio-Pulmonaire (RCP).">
+                    <img src="{{ url_for('static', filename='soins_urgence.jpg') }}" alt="Formation aux Soins d'Urgence">
+                    <div class="card-caption">
+                        <h4>Formation aux Soins d'Urgence</h4>
+                        <p>Apprentissage pratique des gestes de premiers secours et de la Réanimation Cardio-Pulmonaire (RCP).</p>
+                    </div>
+                </div>
+                
+                <div class="photo-card" 
+                     data-src="{{ url_for('static', filename='soins_infirmiers.jpg') }}"
+                     data-caption="Perfectionnement des techniques d'injection et de soins infirmiers, sous la supervision des formateurs.">
+                    <img src="{{ url_for('static', filename='soins_infirmiers.jpg') }}" alt="Techniques de Soins">
+                    <div class="card-caption">
+                        <h4>Ateliers de Soins Infirmiers</h4>
+                        <p>Perfectionnement des techniques d'injection et de soins infirmiers, sous la supervision des formateurs.</p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div id="formulaire-content" class="content-section" style="display: none;">
+            <h2 style="text-align: center; color: var(--color-primary); display: none;">Formulaire de Pré-Inscription</h2> 
+            <p class="note" style="text-align: center; display: none;">Veuillez remplir le formulaire ci-dessous pour lancer votre pré-inscription. Les frais de dossier sont de 5 000 F CFA.</p>
+            
+            <form action="/soumettre-inscription" method="POST" class="form-grid">
+                
+                <fieldset>
+                    <legend>Informations Personnelles</legend>
+                    <div class="form-group">
+                        <label for="nom">Nom</label>
+                        <input type="text" id="nom" name="nom" required autocomplete="family-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Prénom</label>
+                        <input type="text" id="prenom" name="prenom" required autocomplete="given-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="datenaissance">Date de Naissance</label>
+                        <input type="date" id="datenaissance" name="datenaissance" required autocomplete="bday">
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone">Téléphone (Format 8 chiffres)</label>
+                        <input type="tel" id="telephone" name="telephone" pattern="[0-9]{8}" maxlength="8" required autocomplete="tel-national">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Niveau et Choix de Formation</legend>
+                    <div class="form-group">
+                        <label for="niveauetude">Niveau d'Étude Actuel</label>
+                        <select id="niveauetude" name="niveauetude" required>
+                            <option value="">Sélectionnez votre niveau</option>
+                            <option value="DEF">DEF</option>
+                            <option value="Bac">Terminal / Bac</option>
+                            <option value="Bac+1">Bac + 1</option>
+                            <option value="Bac+2">Bac + 2</option>
+                            <option value="Licence">Licence</option>
+                            <option value="Master">Master</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="établissement">Etablissement Actuel</label>
+                        <input type="text" id="établissement" name="etablissement_actuel"> 
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="formation">Formation demandée</label>
+                        <select id="formation" name="formation" required>
+                            <option value="">Sélectionnez la formation</option>
+                            <option value="Biologie Médicale">Biologie Médicale / Technicien Labo-Pharmacie (DEF/Bac)</option>
+                            <option value="Infirmier">Infirmier(ère) d'État (IDE) / Santé Publique</option>
+                            <option value="Obstetrique">Obstétrique (Sage-Femme, Infirmière Obstétricienne)</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <div class="paiement-options full-width">
+                    <h4 style="color: var(--color-secondary); margin-bottom: 15px;">Option de Formation & Frais</h4>
+                    
+                    <label for="formation_option" style="margin-bottom: 10px;">Choix de l'Option (Affecte la Mensualité) :</label>
+                    <div class="radio-option">
+                        <input type="radio" id="option_groupe" name="formation_option" value="Groupe" required>
+                        <label for="option_groupe">Formation en Groupe (Mensualité : 25 000 F CFA)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="option_individuelle" name="formation_option" value="Individuelle" required>
+                        <label for="option_individuelle">Formation Individuelle (Mensualité : 50 000 F CFA)</label>
+                    </div>
+                    
+                    <p style="margin-top: 15px; font-weight: bold; color: var(--color-secondary);">
+                        ⚠️ Frais d’Inscription et Dossier Obligatoires : 5 000 F CFA
+                    </p>
+                </div>
+
+                <div class="full-width">
+                    <label for="methode_paiement">Méthode de Paiement des Frais de Dossier (5 000 F CFA)</label>
+                    <select id="methode_paiement" name="methode_paiement" required>
+                        <option value="">Sélectionnez la méthode</option>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="Transfert Bancaire">Transfert Bancaire</option>
+                        <option value="Sur Place">Paiement sur Place (Centre Manoor)</option>
+                    </select>
+                </div>
+                
+
+                <button type="submit" class="cta-button full-width" style="background-color: var(--color-secondary);">
+                    Valider la Pré-Inscription et Procéder au Paiement (5000 F CFA)
+                </button>
+
+            </form>
+        </div>
+        
+        <div id="sommaire-content" class="content-section" style="display: none;">
+            <h2 style="text-align: left; border-bottom: none; color: var(--color-primary);">PRÉSENTATION DU CENTRE DE FORMATION MANOOR</h2>
+            <h3>CONTEXTE ET JUSTIFICATION</h3>
+            <p>Le secteur de la santé au Mali, comme dans de nombreux pays en développement, fait face à des défis critiques. La prolifération anarchique d’écoles de santé privées, souvent dépourvues de moyens pédagogiques adaptés, a entraîné une baisse alarmante de la qualité des formations. Les conséquences sont tangibles et dramatiques :</p>
+            <ul>
+                <li>Un taux de mortalité maternelle et infantile qui peine à diminuer.</li>
+                <li>Des erreurs de diagnostic récurrentes, mettant en péril des vies humaines.</li>
+                <li>Une méfiance grandissante des populations envers les professionnels de santé.</li>
+            </ul>
+            <p>Dans ce contexte, les bailleurs de fonds hésitent à financer des projets de santé, créant un cercle vicieux où le manque de ressources aggrave la qualité des soins. Pourtant, la santé reste un besoin universel et fondamental. Notre conviction : le problème n’est pas un manque de bonnes volontés, mais un déficit criant de **formation pratique** et adaptée aux réalités du terrain. C’est pour combler ce vide que le Centre de Perfectionnement en Soins Infirmiers et Obstétricaux a été créé. Nous formons des étudiants et professionnels immédiatement opérationnels, capables de répondre aux urgences sanitaires avec compétence, empathie et rigueur.</p>
+            
+            <h3>NOTRE MISSION ET NOTRE VISION</h3>
+            <p><strong>🔹 Mission</strong></p>
+            <p>Offrir une formation pratique, intensive et d’excellence aux élèves, étudiants et professionnels de santé, afin de renforcer leurs compétences techniques, physiques et psychologiques pour un exercice professionnel sûr et humain.</p>
+            <p><strong>🔹 Vision</strong></p>
+            <p>Devenir la référence incontournable en matière de formation pratique en soins infirmiers et obstétricaux au Mali et en Afrique de l’Ouest, contribuant ainsi à l’amélioration durable des systèmes de santé et du bien-être des populations.</p>
+
+            <h3>NOS CIBLES : Tous les acteurs de la santé en besoin de pratique</h3>
+            <p>Notre centre s’adresse à tous ceux qui souhaitent renforcer leurs compétences pratiques et se préparer aux réalités du terrain :</p>
+            <ul>
+                <li>🎓 Élèves et étudiants des écoles de santé (infirmiers, sages-femmes, techniciens de laboratoire)</li>
+                <li>Étudiants en médecine souhaitant acquérir une expérience clinique solide</li>
+                <li>💼 Professionnels de santé en activité désireux de se perfectionner ou de se réorienter</li>
+            </ul>
+
+            <h3>NOS ACTIVITÉS : du savoir-faire à l’excellence</h3>
+            <h4>✅ Formation pratique intensive</h4>
+            <ul>
+                <li>Techniques de soins infirmiers (pose de perfusions, pansements, gestes d’urgence, etc.)</li>
+                <li>Techniques obstétricales (accouchement, surveillance du postpartum, soins au nouveau-né)</li>
+                <li>Techniques de laboratoire (prélèvements, analyses biologiques, gestion des échantillons)</li>
+            </ul>
+            <h4>✅ Perfectionnement des professionnels</h4>
+            <ul>
+                <li>Modules courts et intensifs adaptés aux besoins spécifiques des structures de santé</li>
+                <li>Recyclage sur les protocoles nationaux et internationaux</li>
+            </ul>
+            <h4>✅ Simulation d’épreuves pratiques</h4>
+            <ul>
+                <li>Préparation aux examens et concours avec des mises en situation réelles</li>
+                <li>Évaluation individualisée et coaching personnalisé</li>
+            </ul>
+            <h4>✅ Placement en stage et en emploi</h4>
+            <ul>
+                <li>Partenariats avec des cliniques, hôpitaux et laboratoires</li>
+                <li>Accompagnement vers l’insertion professionnelle</li>
+            </ul>
+            <h4>✅ Accompagnement administratif</h4>
+            <ul>
+                <li>Aide à la rédaction de CV, préparation aux entretiens, rapport de stage</li>
+            </ul>
+        </div>
+        
+        <div id="contact" class="content-section" style="display: none;">
+            <h2 style="text-align: center; color: var(--color-primary);">Informations Légales et Coordonnées</h2> 
+            <div style="max-width: 500px; margin: auto; line-height: 1.8;">
+                <p><strong>DENOMINATION :</strong> Centre de Perfectionnement en Soins Infirmiers et Obstétricaux Manoor</p>
+                <p><strong>STATUT JURIDIQUE :</strong> SARL</p>
+                <p><strong>N° NIF :</strong> 086161596C</p>
+                <p><strong>N° NINA :</strong> 42309196892012N</p>
+                <p><strong>RCGM :</strong> MA.BKO.2023.Β.1416</p>
+                <p><strong>ADRESSE :</strong> Yirimadio, derrière le Stade du 26 Mars, Bamako - Mali</p>
+            </div>
+        </div>
+
     </div>
+    
+    <div id="imageModal" class="modal">
+        
+        <span class="close" id="closeModal">&times;</span>
+
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Image agrandie">
+        </div>
+        
+        <div id="modalCaption" class="modal-caption"></div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Centre Manoor. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ====================================================
+            // Éléments de la page
+            // ====================================================
+            const sections = document.querySelectorAll('.content-section');
+            const mainTitle = document.getElementById('main-title');
+            
+            // Liens de Navigation (IDs des liens dans le <nav>)
+            const navPreInscription = document.getElementById('navPreInscription');
+            const homeAnchor = document.getElementById('home-anchor'); 
+
+            const navAccueil = document.getElementById('navAccueil');
+            const navToggleSommaire = document.getElementById('toggleSommaire'); 
+            const navToggleContact = document.getElementById('navToggleContact');
+            
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            
+            // NOUVEAU: Référence à la galerie
+            const gallerySection = document.getElementById('gallery-section');
+
+            // LOGIQUE DE LA NAVIGATION MOBILE
+            menuToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+            
+            navMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        navMenu.classList.remove('active');
+                    }
+                });
+            });
+
+            // ====================================================
+            // Fonction de Gestion Centrale des Sections
+            // ====================================================
+
+            function showSection(sectionId, titleText) {
+                // 1. Masquer toutes les sections de contenu
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // NOUVEAU: Masquer la galerie
+                gallerySection.style.display = 'none';
+
+                // 2. Afficher l'ancre pour centrer le titre
+                homeAnchor.style.display = 'flex'; 
+
+                // 3. Afficher la section demandée
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                    
+                    // 4. Mettre à jour et afficher le titre principal
+                    mainTitle.textContent = titleText;
+                    mainTitle.style.display = 'block';
+
+                    // 5. Défilement vers l'ancre de la page 
+                    homeAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            
+            // --- GESTION DES CLICS ---
+
+            // 1. LIEN INSCRIPTION (Affiche la div ID: formulaire-content)
+            navPreInscription.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('formulaire-content', 'Formulaire de Pré-Inscription');
+            });
+
+            // 2. SOMMAIRE (Affiche la div ID: sommaire-content)
+            navToggleSommaire.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('sommaire-content', 'Sommaire de Présentation');
+            });
+
+            // 3. CONTACT (Affiche la div ID: contact)
+            navToggleContact.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('contact', 'Coordonnées du Centre');
+            });
+            
+            // 4. ACCUEIL (Retour à la vue initiale)
+            navAccueil.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                
+                sections.forEach(section => { section.style.display = 'none'; });
+                mainTitle.style.display = 'none';
+                homeAnchor.style.display = 'flex'; 
+
+                // NOUVEAU : Afficher la galerie
+                gallerySection.style.display = 'block'; 
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // ====================================================
+            // LOGIQUE DU MODAL / LIGHTBOX
+            // ====================================================
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalCaption = document.getElementById('modalCaption');
+            const closeModal = document.getElementById('closeModal');
+            // Utiliser querySelectorAll pour cibler toutes les cartes
+            const photoCards = document.querySelectorAll('.photo-card'); 
+
+            // 1. Gérer l'ouverture du modal au clic sur une carte
+            photoCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Récupérer les données stockées dans les attributs data-
+                    const imgSrc = this.getAttribute('data-src');
+                    const imgCaption = this.getAttribute('data-caption');
+                    
+                    modal.style.display = 'flex'; // Afficher le modal (en mode flex pour centrer)
+                    modalImage.src = imgSrc;
+                    modalCaption.textContent = imgCaption;
+                    // Assurez-vous que l'affichage est au sommet
+                    document.body.style.overflow = 'hidden'; 
+                });
+            });
+
+            // 2. Gérer la fermeture au clic sur le 'X'
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Rétablir le défilement
+            });
+
+            // 3. Gérer la fermeture au clic en dehors de l'image
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Rétablir le défilement
+                }
+            });
+            
+            // 4. Gérer la fermeture avec la touche ECHAP
+            document.addEventListener('keydown', function(event) {
+                if (event.key === "Escape" && modal.style.display === 'flex') {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Rétablir le défilement
+                }
+            });
+
+        });
+    </script>
 </body>
 </html>
