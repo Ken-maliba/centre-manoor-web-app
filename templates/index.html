@@ -7,18 +7,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
-        /* Définition des couleurs (si non déjà dans style.css) */
+        /* Définition des couleurs */
         :root {
-            --color-primary: #007bff; /* Bleu */
-            --color-secondary: #ff6347; /* Orange/Rouge du bouton */
-            --color-accent: #e9543e; /* Une variante de l'orange */
+            --color-primary: #007bff; 
+            --color-secondary: #ff6347; 
         }
         
-        /* Styles pour le body et le fond d'écran */
+        /* 1. STYLES DU BODY ET DU FOND D'ÉCRAN */
         body {
-            /* Assurez-vous que le nom du fichier est correct (d'après le dépôt, ce pourrait être IMG-20251123-WA0004.jpg) */
-            /* J'utilise un nom générique diplomes_manoor.jpg comme dans l'exemple précédent */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("{{ url_for('static', filename='diplomes_manoor.jpg') }}"); 
+            /* NOM DE L'IMAGE À VÉRIFIER : Utilisation du nom de votre dernier upload */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                              url("{{ url_for('static', filename='IMG-20251128-WA0041.jpg') }}"); 
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -27,23 +26,8 @@
             min-height: 100vh;
         }
 
-        /* NOUVEAU STYLE pour le lien/bouton dans la barre de navigation */
-        .nav-button a {
-            background-color: var(--color-secondary); /* Couleur vive pour attirer l'attention */
-            color: white !important;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        
-        .nav-button a:hover {
-            background-color: #d1513a;
-        }
-
-        /* Styles du contenu */
+        /* Styles pour que le contenu s'affiche bien sur l'image de fond */
         .content-section {
-            /* Utilisation d'un fond très légèrement transparent pour le contenu */
             background-color: rgba(255, 255, 255, 0.95); 
             padding: 30px;
             border-radius: 8px;
@@ -51,7 +35,7 @@
             margin-bottom: 40px;
         }
         
-        /* Styles pour le pied de page fixé en bas */
+        /* 2. PIED DE PAGE FIXÉ EN BAS */
         footer {
             width: 100%;
             background-color: #121212; 
@@ -68,26 +52,36 @@
         /* Marge pour éviter que le contenu ne soit caché par le footer */
         .container.section-padded {
             padding-bottom: 70px; 
+            padding-top: 20px; 
+        }
+        
+        /* 3. STYLES DU BOUTON D'INSCRIPTION DANS LA NAVIGATION */
+        .nav-button a {
+            background-color: var(--color-secondary); 
+            color: white !important;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            line-height: 1.5; 
+            display: inline-block;
+        }
+        
+        .nav-button a:hover {
+            background-color: #d1513a; 
         }
 
-        /* Le bouton central initial doit être masqué puisqu'il est dans la nav */
+        /* L'ancien bouton central est complètement masqué */
         #toggleFormulaire {
             display: none !important;
         }
-
-        /* Styles pour l'effet de frappe (maintenu pour le titre initial si vous le réactivez) */
-        #typing-effect {
-            border-right: .15em solid white; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            margin: 0;
-            animation: blink-caret .75s step-end infinite;
+        
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 15px;
         }
-
-        @keyframes blink-caret {
-            from, to { border-color: transparent }
-            50% { border-color: white }
-        }
+        
     </style>
 </head>
 <body>
@@ -101,7 +95,9 @@
                 <ul>
                     <li><a href="{{ url_for('index') }}" id="navAccueil">Accueil</a></li>
                     <li><a href="#" id="toggleSommaire">Sommaire</a></li>
+                    
                     <li class="nav-button"><a href="#" id="navPreInscription">S'inscrire !</a></li> 
+                    
                     <li><a href="https://wa.me/c/22373607241" target="_blank">Manoor Shop</a></li>
                     <li><a href="#" id="navToggleContact">Nous Contacter</a></li>
                     <li><a href="{{ url_for('login') }}">Admin Login</a></li>
@@ -115,18 +111,166 @@
         
         <h1 id="main-title" style="display: none; text-align: center; color: var(--color-primary);"></h1> 
 
-        <a href="#" id="toggleFormulaire" style="display: none;">
-            Cliquez ici pour <span id="typing-effect">Démarrer votre Pré-Inscription</span>
-        </a>
-        
         <div id="formulaire-content" class="content-section" style="display: none;">
-            </div>
+            <h2 style="text-align: center; color: var(--color-primary);">Formulaire de Pré-Inscription</h2>
+            <p class="note" style="text-align: center;">Veuillez remplir le formulaire ci-dessous pour lancer votre pré-inscription. Les frais de dossier sont de 5 000 F CFA.</p>
+            
+            <form action="/soumettre-inscription" method="POST" class="form-grid">
+                
+                <fieldset>
+                    <legend>Informations Personnelles</legend>
+                    <div class="form-group">
+                        <label for="nom">Nom</label>
+                        <input type="text" id="nom" name="nom" required autocomplete="family-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Prénom</label>
+                        <input type="text" id="prenom" name="prenom" required autocomplete="given-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="datenaissance">Date de Naissance</label>
+                        <input type="date" id="datenaissance" name="datenaissance" required autocomplete="bday">
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone">Téléphone (Format 8 chiffres)</label>
+                        <input type="tel" id="telephone" name="telephone" pattern="[0-9]{8}" maxlength="8" required autocomplete="tel-national">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Niveau et Choix de Formation</legend>
+                    <div class="form-group">
+                        <label for="niveauetude">Niveau d'Étude Actuel</label>
+                        <select id="niveauetude" name="niveauetude" required>
+                            <option value="">Sélectionnez votre niveau</option>
+                            <option value="DEF">DEF</option>
+                            <option value="Bac">Terminal / Bac</option>
+                            <option value="Bac+1">Bac + 1</option>
+                            <option value="Bac+2">Bac + 2</option>
+                            <option value="Licence">Licence</option>
+                            <option value="Master">Master</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="établissement">Etablissement Actuel</label>
+                        <input type="text" id="établissement" name="etablissement_actuel"> 
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="formation">Formation demandée</label>
+                        <select id="formation" name="formation" required>
+                            <option value="">Sélectionnez la formation</option>
+                            <option value="Biologie Médicale">Biologie Médicale / Technicien Labo-Pharmacie (DEF/Bac)</option>
+                            <option value="Infirmier">Infirmier(ère) d'État (IDE) / Santé Publique</option>
+                            <option value="Obstetrique">Obstétrique (Sage-Femme, Infirmière Obstétricienne)</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <div class="paiement-options full-width">
+                    <h4 style="color: var(--color-secondary); margin-bottom: 15px;">Option de Formation & Frais</h4>
+                    
+                    <label for="formation_option" style="margin-bottom: 10px;">Choix de l'Option (Affecte la Mensualité) :</label>
+                    <div class="radio-option">
+                        <input type="radio" id="option_groupe" name="formation_option" value="Groupe" required>
+                        <label for="option_groupe">Formation en Groupe (Mensualité : 25 000 F CFA)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="option_individuelle" name="formation_option" value="Individuelle" required>
+                        <label for="option_individuelle">Formation Individuelle (Mensualité : 50 000 F CFA)</label>
+                    </div>
+                    
+                    <p style="margin-top: 15px; font-weight: bold; color: var(--color-secondary);">
+                        ⚠️ Frais d’Inscription et Dossier Obligatoires : 5 000 F CFA
+                    </p>
+                </div>
+
+                <div class="full-width">
+                    <label for="methode_paiement">Méthode de Paiement des Frais de Dossier (5 000 F CFA)</label>
+                    <select id="methode_paiement" name="methode_paiement" required>
+                        <option value="">Sélectionnez la méthode</option>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="Transfert Bancaire">Transfert Bancaire</option>
+                        <option value="Sur Place">Paiement sur Place (Centre Manoor)</option>
+                    </select>
+                </div>
+                
+
+                <button type="submit" class="cta-button full-width" style="background-color: var(--color-secondary);">
+                    Valider la Pré-Inscription et Procéder au Paiement (5000 F CFA)
+                </button>
+
+            </form>
+        </div>
         
         <div id="sommaire-content" class="content-section" style="display: none;">
-            </div>
+            <h2 style="text-align: left; border-bottom: none; color: var(--color-primary);">PRÉSENTATION DU CENTRE DE FORMATION MANOOR</h2>
+            <h3>CONTEXTE ET JUSTIFICATION</h3>
+            <p>Le secteur de la santé au Mali, comme dans de nombreux pays en développement, fait face à des défis critiques. La prolifération anarchique d’écoles de santé privées, souvent dépourvues de moyens pédagogiques adaptés, a entraîné une baisse alarmante de la qualité des formations. Les conséquences sont tangibles et dramatiques :</p>
+            <ul>
+                <li>Un taux de mortalité maternelle et infantile qui peine à diminuer.</li>
+                <li>Des erreurs de diagnostic récurrentes, mettant en péril des vies humaines.</li>
+                <li>Une méfiance grandissante des populations envers les professionnels de santé.</li>
+            </ul>
+            <p>Dans ce contexte, les bailleurs de fonds hésitent à financer des projets de santé, créant un cercle vicieux où le manque de ressources aggrave la qualité des soins. Pourtant, la santé reste un besoin universel et fondamental. Notre conviction : le problème n’est pas un manque de bonnes volontés, mais un déficit criant de **formation pratique** et adaptée aux réalités du terrain. C’est pour combler ce vide que le Centre de Perfectionnement en Soins Infirmiers et Obstétricaux a été créé. Nous formons des étudiants et professionnels immédiatement opérationnels, capables de répondre aux urgences sanitaires avec compétence, empathie et rigueur.</p>
+            
+            <h3>NOTRE MISSION ET NOTRE VISION</h3>
+            <p><strong>🔹 Mission</strong></p>
+            <p>Offrir une formation pratique, intensive et d’excellence aux élèves, étudiants et professionnels de santé, afin de renforcer leurs compétences techniques, physiques et psychologiques pour un exercice professionnel sûr et humain.</p>
+            <p><strong>🔹 Vision</strong></p>
+            <p>Devenir la référence incontournable en matière de formation pratique en soins infirmiers et obstétricaux au Mali et en Afrique de l’Ouest, contribuant ainsi à l’amélioration durable des systèmes de santé et du bien-être des populations.</p>
+
+            <h3>NOS CIBLES : Tous les acteurs de la santé en besoin de pratique</h3>
+            <p>Notre centre s’adresse à tous ceux qui souhaitent renforcer leurs compétences pratiques et se préparer aux réalités du terrain :</p>
+            <ul>
+                <li>🎓 Élèves et étudiants des écoles de santé (infirmiers, sages-femmes, techniciens de laboratoire)</li>
+                <li>Étudiants en médecine souhaitant acquérir une expérience clinique solide</li>
+                <li>💼 Professionnels de santé en activité désireux de se perfectionner ou de se réorienter</li>
+            </ul>
+
+            <h3>NOS ACTIVITÉS : du savoir-faire à l’excellence</h3>
+            <h4>✅ Formation pratique intensive</h4>
+            <ul>
+                <li>Techniques de soins infirmiers (pose de perfusions, pansements, gestes d’urgence, etc.)</li>
+                <li>Techniques obstétricales (accouchement, surveillance du postpartum, soins au nouveau-né)</li>
+                <li>Techniques de laboratoire (prélèvements, analyses biologiques, gestion des échantillons)</li>
+            </ul>
+            <h4>✅ Perfectionnement des professionnels</h4>
+            <ul>
+                <li>Modules courts et intensifs adaptés aux besoins spécifiques des structures de santé</li>
+                <li>Recyclage sur les protocoles nationaux et internationaux</li>
+            </ul>
+            <h4>✅ Simulation d’épreuves pratiques</h4>
+            <ul>
+                <li>Préparation aux examens et concours avec des mises en situation réelles</li>
+                <li>Évaluation individualisée et coaching personnalisé</li>
+            </ul>
+            <h4>✅ Placement en stage et en emploi</h4>
+            <ul>
+                <li>Partenariats avec des cliniques, hôpitaux et laboratoires</li>
+                <li>Accompagnement vers l’insertion professionnelle</li>
+            </ul>
+            <h4>✅ Accompagnement administratif</h4>
+            <ul>
+                <li>Aide à la rédaction de CV, préparation aux entretiens, rapport de stage</li>
+            </ul>
+        </div>
         
         <div id="contact" class="content-section" style="display: none;">
+            <h2 style="text-align: center; color: var(--color-primary);">Informations Légales et Coordonnées</h2> 
+            <div style="max-width: 500px; margin: auto; line-height: 1.8;">
+                <p><strong>DENOMINATION :</strong> Centre de Perfectionnement en Soins Infirmiers et Obstétricaux Manoor</p>
+                <p><strong>STATUT JURIDIQUE :</strong> SARL</p>
+                <p><strong>N° NIF :</strong> 086161596C</p>
+                <p><strong>N° NINA :</strong> 42309196892012N</p>
+                <p><strong>RCGM :</strong> MA.BKO.2023.Β.1416</p>
+                <p><strong>ADRESSE :</strong> Yirimadio, derrière le Stade du 26 Mars, Bamako - Mali</p>
             </div>
+        </div>
 
     </div>
     
@@ -145,7 +289,7 @@
             const sections = document.querySelectorAll('.content-section');
             const mainTitle = document.getElementById('main-title');
             
-            // NOUVEL ÉLÉMENT DE NAVIGATION
+            // L'élément qui déclenche l'affichage du formulaire
             const navPreInscription = document.getElementById('navPreInscription');
             
             const navAccueil = document.getElementById('navAccueil');
@@ -155,12 +299,13 @@
             const navMenu = document.getElementById('nav-menu');
             
             // ====================================================
-            // LOGIQUE DE LA NAVIGATION MOBILE (inchangée)
+            // LOGIQUE DE LA NAVIGATION MOBILE
             // ====================================================
             menuToggle.addEventListener('click', function() {
                 navMenu.classList.toggle('active');
             });
             
+            // Fermer le menu après le clic sur un lien (sur mobile)
             navMenu.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', function() {
                     if (window.innerWidth <= 768) {
@@ -170,58 +315,50 @@
             });
 
             // ====================================================
-            // Fonction de Gestion Centrale des Sections (inchangée)
+            // Fonction de Gestion Centrale des Sections
             // ====================================================
 
             function showSection(sectionId, titleText) {
+                // Masquer toutes les sections
                 sections.forEach(section => {
                     section.style.display = 'none';
                 });
 
+                // Afficher la section demandée
                 const targetSection = document.getElementById(sectionId);
                 if (targetSection) {
                     targetSection.style.display = 'block';
+                    
+                    // Mettre à jour et afficher le titre principal
                     mainTitle.textContent = titleText;
                     mainTitle.style.display = 'block';
 
-                    // L'ancien bouton central est maintenant caché par défaut.
-                    
+                    // Défilement vers le haut de la nouvelle section
                     window.scrollTo({ top: 0, behavior: 'smooth' }); 
                 }
             }
             
-            // ====================================================
-            // Logique du Typing Effect (supprimée car le bouton central n'est plus utilisé)
-            // Vous pouvez la réutiliser si vous affichez un titre tapé.
-            // ====================================================
-            
-            // Logique de l'Accueil : Nous affichons maintenant directement le Sommaire par défaut,
-            // ou vous pouvez choisir d'afficher une section d'accueil.
-            // Pour l'instant, le clic sur Accueil ne fait que réinitialiser la vue.
+            // --- GESTION DES CLICS ---
 
-            // ====================================================
-            // Gestion des Clics
-            // ====================================================
-
-            // 1. LIEN INSCRIPTION (NOUVELLE FONCTIONNALITÉ)
+            // 1. LIEN INSCRIPTION 
             navPreInscription.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('formulaire-content', 'Formulaire de Pré-Inscription');
             });
 
-
-            // Liens de Navigation (inchangés)
+            // 2. SOMMAIRE
             navToggleSommaire.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('sommaire-content', 'Sommaire de Présentation');
             });
 
+            // 3. CONTACT
             navToggleContact.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('contact', 'Coordonnées du Centre');
             });
             
-            // Gérer le clic sur "Accueil" 
+            // 4. ACCUEIL (Retour à la vue initiale)
             navAccueil.addEventListener('click', function(e) {
                 e.preventDefault(); 
                 
