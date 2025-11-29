@@ -1,5 +1,6 @@
 /* ====================================================
  * SECTION : COULEURS ET VARIABLES
+ * (Transféré depuis le <style> de index.html)
  * ==================================================== */
 :root {
     --color-primary: #007bff; /* Bleu */
@@ -8,6 +9,7 @@
 
 /* ====================================================
  * SECTION : STYLES DE BASE (BODY ET FOND D'ÉCRAN)
+ * (Transféré depuis le <style> de index.html et style.css initial)
  * ==================================================== */
 body {
     font-family: Arial, sans-serif;
@@ -211,12 +213,6 @@ header .container {
 }
 
 /* Styles pour les options de paiement/formation */
-.paiement-options {
-    padding: 15px;
-    border: 1px dashed var(--color-secondary);
-    border-radius: 5px;
-}
-
 .radio-option {
     display: flex;
     align-items: center;
@@ -247,6 +243,7 @@ header .container {
 
 /* ----------------------------------
  * SECTION : GALERIE DE PHOTOS
+ * (Nouveaux styles de la galerie)
  * ---------------------------------- */
 
 .gallery-container {
@@ -297,6 +294,7 @@ header .container {
 
 /* ----------------------------------
  * SECTION : STYLES POUR LA LIGHTBOX / MODAL
+ * (Nouveaux styles du modal)
  * ---------------------------------- */
 
 .modal {
@@ -371,6 +369,7 @@ header .container {
 
 /* ----------------------------------
  * SECTION : FOOTER FIXÉ
+ * (Nouveaux styles du footer)
  * ---------------------------------- */
 footer {
     width: 100%;
