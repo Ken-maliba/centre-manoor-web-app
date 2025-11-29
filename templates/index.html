@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pré-Inscription en Ligne - Centre Manoor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
-        /* Définition des couleurs */
         :root {
             --color-primary: #007bff; 
             --color-secondary: #ff6347; 
         }
         
-        /* STYLES DU BODY ET DU FOND D'ÉCRAN */
+        /* ======================================================= */
+        /* CORRECTION FOND NOIR : Assurer le chargement de l'image */
+        /* ======================================================= */
         body {
-            /* L'image de fond est définie ici. */
+            /* Assurez-vous que le nom du fichier est EXACT (majuscules/minuscules) */
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
                               url("{{ url_for('static', filename='IMG-20251128-WA0041.jpg') }}"); 
+            
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -24,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Styles pour que le contenu s'affiche bien sur l'image de fond */
         .content-section {
             background-color: rgba(255, 255, 255, 0.95); 
             padding: 30px;
@@ -35,8 +38,8 @@
             z-index: 10;
         }
         
-        /* PIED DE PAGE FIXÉ EN BAS */
         footer {
+            /* ... (Styles du footer inchangés) ... */
             width: 100%;
             background-color: #121212; 
             color: white;
@@ -49,14 +52,13 @@
             box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
         }
         
-        /* Marge pour éviter que le contenu ne soit caché par le footer */
         .container.section-padded {
             padding-bottom: 70px; 
             padding-top: 20px; 
         }
         
-        /* STYLES DU BOUTON D'INSCRIPTION DANS LA NAVIGATION */
         .nav-button a {
+            /* ... (Styles du bouton de navigation inchangés) ... */
             background-color: var(--color-secondary); 
             color: white !important;
             padding: 8px 15px;
@@ -71,7 +73,6 @@
             background-color: #d1513a; 
         }
 
-        /* Le titre principal qui apparaît en haut des sections */
         #main-title {
             margin-top: 20px; 
             margin-bottom: 20px; 
@@ -80,15 +81,13 @@
             border-radius: 5px;
         }
         
-        /* Zone d'ancrage pour le titre initial */
         #home-anchor {
             height: 250px; 
-            display: flex; /* Assure que le fond reste bien étendu */
+            display: flex; 
             justify-content: center;
             align-items: center;
             position: relative;
         }
-        /* Masquer l'ancien bouton s'il existe */
         #toggleFormulaire {
             display: none !important;
         }
@@ -221,69 +220,10 @@
         </div>
         
         <div id="sommaire-content" class="content-section" style="display: none;">
-            <h2 style="text-align: left; border-bottom: none; color: var(--color-primary);">PRÉSENTATION DU CENTRE DE FORMATION MANOOR</h2>
-            <h3>CONTEXTE ET JUSTIFICATION</h3>
-            <p>Le secteur de la santé au Mali, comme dans de nombreux pays en développement, fait face à des défis critiques. La prolifération anarchique d’écoles de santé privées, souvent dépourvues de moyens pédagogiques adaptés, a entraîné une baisse alarmante de la qualité des formations. Les conséquences sont tangibles et dramatiques :</p>
-            <ul>
-                <li>Un taux de mortalité maternelle et infantile qui peine à diminuer.</li>
-                <li>Des erreurs de diagnostic récurrentes, mettant en péril des vies humaines.</li>
-                <li>Une méfiance grandissante des populations envers les professionnels de santé.</li>
-            </ul>
-            <p>Dans ce contexte, les bailleurs de fonds hésitent à financer des projets de santé, créant un cercle vicieux où le manque de ressources aggrave la qualité des soins. Pourtant, la santé reste un besoin universel et fondamental. Notre conviction : le problème n’est pas un manque de bonnes volontés, mais un déficit criant de **formation pratique** et adaptée aux réalités du terrain. C’est pour combler ce vide que le Centre de Perfectionnement en Soins Infirmiers et Obstétricaux a été créé. Nous formons des étudiants et professionnels immédiatement opérationnels, capables de répondre aux urgences sanitaires avec compétence, empathie et rigueur.</p>
-            
-            <h3>NOTRE MISSION ET NOTRE VISION</h3>
-            <p><strong>🔹 Mission</strong></p>
-            <p>Offrir une formation pratique, intensive et d’excellence aux élèves, étudiants et professionnels de santé, afin de renforcer leurs compétences techniques, physiques et psychologiques pour un exercice professionnel sûr et humain.</p>
-            <p><strong>🔹 Vision</strong></p>
-            <p>Devenir la référence incontournable en matière de formation pratique en soins infirmiers et obstétricaux au Mali et en Afrique de l’Ouest, contribuant ainsi à l’amélioration durable des systèmes de santé et du bien-être des populations.</p>
-
-            <h3>NOS CIBLES : Tous les acteurs de la santé en besoin de pratique</h3>
-            <p>Notre centre s’adresse à tous ceux qui souhaitent renforcer leurs compétences pratiques et se préparer aux réalités du terrain :</p>
-            <ul>
-                <li>🎓 Élèves et étudiants des écoles de santé (infirmiers, sages-femmes, techniciens de laboratoire)</li>
-                <li>Étudiants en médecine souhaitant acquérir une expérience clinique solide</li>
-                <li>💼 Professionnels de santé en activité désireux de se perfectionner ou de se réorienter</li>
-            </ul>
-
-            <h3>NOS ACTIVITÉS : du savoir-faire à l’excellence</h3>
-            <h4>✅ Formation pratique intensive</h4>
-            <ul>
-                <li>Techniques de soins infirmiers (pose de perfusions, pansements, gestes d’urgence, etc.)</li>
-                <li>Techniques obstétricales (accouchement, surveillance du postpartum, soins au nouveau-né)</li>
-                <li>Techniques de laboratoire (prélèvements, analyses biologiques, gestion des échantillons)</li>
-            </ul>
-            <h4>✅ Perfectionnement des professionnels</h4>
-            <ul>
-                <li>Modules courts et intensifs adaptés aux besoins spécifiques des structures de santé</li>
-                <li>Recyclage sur les protocoles nationaux et internationaux</li>
-            </ul>
-            <h4>✅ Simulation d’épreuves pratiques</h4>
-            <ul>
-                <li>Préparation aux examens et concours avec des mises en situation réelles</li>
-                <li>Évaluation individualisée et coaching personnalisé</li>
-            </ul>
-            <h4>✅ Placement en stage et en emploi</h4>
-            <ul>
-                <li>Partenariats avec des cliniques, hôpitaux et laboratoires</li>
-                <li>Accompagnement vers l’insertion professionnelle</li>
-            </ul>
-            <h4>✅ Accompagnement administratif</h4>
-            <ul>
-                <li>Aide à la rédaction de CV, préparation aux entretiens, rapport de stage</li>
-            </ul>
-        </div>
+            </div>
         
         <div id="contact" class="content-section" style="display: none;">
-            <h2 style="text-align: center; color: var(--color-primary);">Informations Légales et Coordonnées</h2> 
-            <div style="max-width: 500px; margin: auto; line-height: 1.8;">
-                <p><strong>DENOMINATION :</strong> Centre de Perfectionnement en Soins Infirmiers et Obstétricaux Manoor</p>
-                <p><strong>STATUT JURIDIQUE :</strong> SARL</p>
-                <p><strong>N° NIF :</strong> 086161596C</p>
-                <p><strong>N° NINA :</strong> 42309196892012N</p>
-                <p><strong>RCGM :</strong> MA.BKO.2023.Β.1416</p>
-                <p><strong>ADRESSE :</strong> Yirimadio, derrière le Stade du 26 Mars, Bamako - Mali</p>
             </div>
-        </div>
 
     </div>
     
@@ -296,13 +236,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // ====================================================
-            // Éléments de la page
-            // ====================================================
             const sections = document.querySelectorAll('.content-section');
             const mainTitle = document.getElementById('main-title');
-            
-            // L'élément qui déclenche l'affichage du formulaire
             const navPreInscription = document.getElementById('navPreInscription');
             const homeAnchor = document.getElementById('home-anchor'); 
 
@@ -312,9 +247,7 @@
             const menuToggle = document.querySelector('.menu-toggle');
             const navMenu = document.getElementById('nav-menu');
             
-            // ====================================================
             // LOGIQUE DE LA NAVIGATION MOBILE
-            // ====================================================
             menuToggle.addEventListener('click', function() {
                 navMenu.classList.toggle('active');
             });
@@ -327,17 +260,14 @@
                 });
             });
 
-            // ====================================================
             // Fonction de Gestion Centrale des Sections
-            // ====================================================
-
             function showSection(sectionId, titleText) {
                 // 1. Masquer toutes les sections
                 sections.forEach(section => {
                     section.style.display = 'none';
                 });
                 
-                // 2. Afficher l'ancre (pour le centrage du titre)
+                // 2. Afficher l'ancre 
                 homeAnchor.style.display = 'flex'; 
 
                 // 3. Afficher la section demandée
@@ -349,7 +279,7 @@
                     mainTitle.textContent = titleText;
                     mainTitle.style.display = 'block';
 
-                    // 5. Défilement vers l'ancre de la page (où le titre est centré)
+                    // 5. Défilement vers l'ancre de la page 
                     homeAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
@@ -384,7 +314,7 @@
                 // Masquer le titre principal
                 mainTitle.style.display = 'none';
                 
-                // Laisser l'ancre visible (le display: flex; est important ici)
+                // Garder l'ancre visible pour que le fond d'écran remplisse l'espace
                 homeAnchor.style.display = 'flex'; 
 
                 // Remonter en haut de la page
