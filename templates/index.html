@@ -68,6 +68,26 @@
             from, to { border-color: transparent }
             50% { border-color: white }
         }
+        /* NOUVEAU STYLE POUR FIXER LE PIED DE PAGE */
+    footer {
+        width: 100%;
+        background-color: #121212; /* Couleur sombre cohérente avec l'overlay du fond */
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        /* Propriétés cruciales pour le fixer en bas de l'écran */
+        position: fixed; 
+        bottom: 0;
+        left: 0;
+        z-index: 1000; /* Assure qu'il est au-dessus des autres éléments */
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Le pied de page étant fixe, il faut laisser un espace en bas du contenu
+       pour qu'il ne se chevauche pas avec les dernières lignes de texte. */
+    .container.section-padded {
+        padding-bottom: 70px; /* Ajoute un espace de la hauteur du footer + marge */
+    }
     </style>
 </head>
 <body>
