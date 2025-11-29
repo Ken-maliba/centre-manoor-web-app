@@ -480,7 +480,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             
             // ====================================================
-            // Éléments de la page
+            // Éléments de la page (Navigation)
             // ====================================================
             const sections = document.querySelectorAll('.content-section');
             const mainTitle = document.getElementById('main-title');
@@ -496,7 +496,7 @@
             const menuToggle = document.querySelector('.menu-toggle');
             const navMenu = document.getElementById('nav-menu');
             
-            // NOUVEAU: Référence à la galerie
+            // Référence à la galerie
             const gallerySection = document.getElementById('gallery-section');
 
             // LOGIQUE DE LA NAVIGATION MOBILE
@@ -522,7 +522,7 @@
                     section.style.display = 'none';
                 });
                 
-                // NOUVEAU: Masquer la galerie
+                // Masquer la galerie
                 gallerySection.style.display = 'none';
 
                 // 2. Afficher l'ancre pour centrer le titre
@@ -544,25 +544,25 @@
             
             // --- GESTION DES CLICS ---
 
-            // 1. LIEN INSCRIPTION (Affiche la div ID: formulaire-content)
+            // 1. LIEN INSCRIPTION
             navPreInscription.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('formulaire-content', 'Formulaire de Pré-Inscription');
             });
 
-            // 2. SOMMAIRE (Affiche la div ID: sommaire-content)
+            // 2. SOMMAIRE
             navToggleSommaire.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('sommaire-content', 'Sommaire de Présentation');
             });
 
-            // 3. CONTACT (Affiche la div ID: contact)
+            // 3. CONTACT
             navToggleContact.addEventListener('click', function(e) {
                 e.preventDefault();
                 showSection('contact', 'Coordonnées du Centre');
             });
             
-            // 4. ACCUEIL (Retour à la vue initiale)
+            // 4. ACCUEIL
             navAccueil.addEventListener('click', function(e) {
                 e.preventDefault(); 
                 
@@ -570,7 +570,7 @@
                 mainTitle.style.display = 'none';
                 homeAnchor.style.display = 'flex'; 
 
-                // NOUVEAU : Afficher la galerie
+                // Afficher la galerie
                 gallerySection.style.display = 'block'; 
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -583,7 +583,7 @@
             const modalImage = document.getElementById('modalImage');
             const modalCaption = document.getElementById('modalCaption');
             const closeModal = document.getElementById('closeModal');
-            // Utiliser querySelectorAll pour cibler toutes les cartes
+            // CIBLE PRINCIPALE : toutes les cartes photos
             const photoCards = document.querySelectorAll('.photo-card'); 
 
             // 1. Gérer l'ouverture du modal au clic sur une carte
@@ -593,19 +593,24 @@
                     const imgSrc = this.getAttribute('data-src');
                     const imgCaption = this.getAttribute('data-caption');
                     
-                    modal.style.display = 'flex'; // Afficher le modal (en mode flex pour centrer)
-                    modalImage.src = imgSrc;
-                    modalCaption.textContent = imgCaption;
-                    // Assurez-vous que l'affichage est au sommet
-                    document.body.style.overflow = 'hidden'; 
+                    // Vérification de sécurité avant l'affichage
+                    if (modal && modalImage) {
+                        modal.style.display = 'flex'; // Afficher le modal (en mode flex pour centrer)
+                        modalImage.src = imgSrc;
+                        modalCaption.textContent = imgCaption;
+                        // Empêcher le défilement de la page derrière le modal
+                        document.body.style.overflow = 'hidden'; 
+                    }
                 });
             });
 
             // 2. Gérer la fermeture au clic sur le 'X'
-            closeModal.addEventListener('click', function() {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Rétablir le défilement
-            });
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Rétablir le défilement
+                });
+            }
 
             // 3. Gérer la fermeture au clic en dehors de l'image
             window.addEventListener('click', function(event) {
@@ -617,13 +622,13 @@
             
             // 4. Gérer la fermeture avec la touche ECHAP
             document.addEventListener('keydown', function(event) {
-                if (event.key === "Escape" && modal.style.display === 'flex') {
+                if (event.key === "Escape" && modal && modal.style.display === 'flex') {
                     modal.style.display = 'none';
                     document.body.style.overflow = 'auto'; // Rétablir le défilement
                 }
             });
 
-        });
+        }); // FIN DE document.addEventListener('DOMContentLoaded', function()
     </script>
 </body>
 </html>
