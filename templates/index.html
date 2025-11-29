@@ -15,7 +15,7 @@
         
         /* STYLES DU BODY ET DU FOND D'ÉCRAN */
         body {
-            /* CHEMIN STATIQUE DIRECT POUR ÉVITER LES PROBLÈMES DE CACHE/FLASK */
+            /* CHEMIN STATIQUE DIRECT */
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
                               url("/static/diplomes_manoor.jpg"); 
             
@@ -37,6 +37,52 @@
             position: relative; 
             z-index: 10;
             color: #333; /* Assure la visibilité du texte */
+        }
+        
+        /* NOUVEAUX STYLES POUR LA GALERIE/TEMOIGNAGES SUR LA PAGE D'ACCUEIL */
+        .gallery-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap; /* Permet aux cartes de passer à la ligne sur mobile */
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .photo-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 300px; /* Taille maximale pour chaque carte */
+            transition: transform 0.3s;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px); /* Effet léger au survol */
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover; /* Assure que l'image couvre la zone sans déformation */
+        }
+
+        .card-caption {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-caption h4 {
+            color: var(--color-primary);
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+
+        .card-caption p {
+            color: #555;
+            font-size: 0.9em;
+            margin-bottom: 0;
         }
         
         /* PIED DE PAGE FIXÉ EN BAS */
@@ -125,6 +171,41 @@
         
         <div id="home-anchor">
              <h1 id="main-title" style="display: none; text-align: center; color: var(--color-primary);"></h1> 
+        </div>
+        
+        <div id="gallery-section" class="content-section" style="background-color: transparent; box-shadow: none;">
+            
+            <h2 style="text-align: center; color: white; background-color: rgba(0, 0, 0, 0.4); padding: 10px; border-radius: 5px; margin-bottom: 30px;">
+                Témoignages et Réalisations
+            </h2>
+            
+            <div class="gallery-container">
+                
+                <div class="photo-card">
+                    <img src="{{ url_for('static', filename='diplomes_manoor.jpg') }}" alt="Remise de Diplômes">
+                    <div class="card-caption">
+                        <h4>Félicitations aux Diplômées !</h4>
+                        <p>Une nouvelle promotion de professionnelles de santé prêtes à servir la communauté avec compétence et rigueur.</p>
+                    </div>
+                </div>
+
+                <div class="photo-card">
+                    <img src="{{ url_for('static', filename='photo_pratique.jpg') }}" alt="Cours Pratique">
+                    <div class="card-caption">
+                        <h4>Cours Pratiques Intensifs</h4>
+                        <p>L'excellence par la pratique : nos étudiants travaillent dans des conditions réelles pour maîtriser chaque geste.</p>
+                    </div>
+                </div>
+                
+                <div class="photo-card">
+                    <img src="{{ url_for('static', filename='photo_temoignage.jpg') }}" alt="Témoignage Étudiant">
+                    <div class="card-caption">
+                        <h4>Impact Réel</h4>
+                        <p>« Grâce à Manoor, je me sens enfin capable et confiante pour exercer mon métier. » - Fatoumata D.</p>
+                    </div>
+                </div>
+                
+            </div>
         </div>
 
         <div id="formulaire-content" class="content-section" style="display: none;">
@@ -316,6 +397,9 @@
             const menuToggle = document.querySelector('.menu-toggle');
             const navMenu = document.getElementById('nav-menu');
             
+            // NOUVEAU: Référence à la galerie
+            const gallerySection = document.getElementById('gallery-section');
+
             // LOGIQUE DE LA NAVIGATION MOBILE
             menuToggle.addEventListener('click', function() {
                 navMenu.classList.toggle('active');
@@ -339,13 +423,15 @@
                     section.style.display = 'none';
                 });
                 
+                // NOUVEAU: Masquer la galerie
+                gallerySection.style.display = 'none';
+
                 // 2. Afficher l'ancre pour centrer le titre
                 homeAnchor.style.display = 'flex'; 
 
                 // 3. Afficher la section demandée
                 const targetSection = document.getElementById(sectionId);
                 if (targetSection) {
-                    // C'EST CETTE LIGNE QUI FAIT APPARAÎTRE LE CONTENU
                     targetSection.style.display = 'block';
                     
                     // 4. Mettre à jour et afficher le titre principal
@@ -384,6 +470,9 @@
                 sections.forEach(section => { section.style.display = 'none'; });
                 mainTitle.style.display = 'none';
                 homeAnchor.style.display = 'flex'; 
+
+                // NOUVEAU : Afficher la galerie
+                gallerySection.style.display = 'block'; 
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
