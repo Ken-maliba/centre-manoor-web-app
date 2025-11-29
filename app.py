@@ -8,14 +8,18 @@ import os
 from datetime import datetime
 import io
 import csv
+from dotenv import load_dotenv
+
+# Charge les variables d'environnement depuis .env (utile en développement local)
+load_dotenv()
 
 app = Flask(__name__)
 
-# --- CONFIGURATION PRINCIPALE : CORRECTION PERSISTENCE DB ---
+# --- CONFIGURATION PRINCIPALE ---
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete_pour_les_sessions_manoor')
 
-# 1. Utilisation de la variable d'environnement pour la BDD (PostgreSQL sur Render)
+# 1. Récupération de l'URL de la base de données (Render/PostgreSQL)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 # 2. Correction nécessaire pour SQLAlchemy : Render utilise 'postgres://', 
@@ -27,7 +31,8 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- CONFIGURATION D'EMAIL (À MODIFIER) ---
+# --- CONFIGURATION D'EMAIL (À PERSONNALISER) ---
+# NOTE: Ces variables doivent être définies dans les variables d'environnement sur Render.
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -116,7 +121,6 @@ L'Administration du Centre Manoor
 """
         )
         mail.send(msg)
-        print(f"📧 EMAIL ENVOYÉ avec succès à {inscription.email}")
         return True
     except Exception as e:
         print(f"❌ ÉCHEC ENVOI EMAIL à {inscription.email}: {e}")
@@ -139,6 +143,7 @@ URL_PAGE_SUCCES = '/succes-inscription'
 
 @app.route('/')
 def index():
+    # Note: Flask utilise le fichier index.html qui a toutes les sections masquées.
     return render_template('index.html')
 
 
@@ -181,15 +186,10 @@ def soumettre_inscription():
             db.session.add(nouvelle_inscription)
             db.session.commit()
 
-            print(f"\n✅ INSCRIPTION ENREGISTRÉE dans la BDD: {nouvelle_inscription}")
-
         except Exception as e:
             db.session.rollback()
-            print(f"\n❌ ERREUR LORS DE L'ENREGISTREMENT : {e}")
+            # Si erreur, c'est probablement un téléphone/email déjà utilisé
             return redirect(url_for('page_echec_inscription'))
-
-        if donnees_formulaire['methode_paiement'] == 'Orange Money':
-            print(f"-> Déclenchement SIMULÉ de la requête Orange Money pour {donnees_formulaire['telephone']}")
 
         return redirect(URL_PAGE_SUCCES)
 
@@ -249,7 +249,6 @@ def login():
             flash("Connexion réussie.", 'success')
             return redirect(url_for('admin_dashboard'))
         else:
-            # Rendre à nouveau le template avec un message d'erreur
             return render_template('login.html', error_message="Nom d'utilisateur ou mot de passe invalide.")
 
     return render_template('login.html')
@@ -267,14 +266,15 @@ def logout():
 @app.route('/admin')
 @login_required
 def admin_dashboard():
+    # Affiche le tableau de bord (utiliser admin_dashboard.html)
     inscriptions = Inscription.query.order_by(Inscription.date_soumission.desc()).all()
-    # Ajout du `flash` pour afficher les messages de succès/erreur du CRUD
     return render_template('admin_dashboard.html', inscriptions=inscriptions)
 
 
 @app.route('/admin/details/<int:inscription_id>')
 @login_required
 def inscription_details(inscription_id):
+    # Affiche les détails (utiliser inscription_details.html)
     inscription = Inscription.query.get_or_404(inscription_id)
     return render_template('inscription_details.html', inscription=inscription)
 
@@ -290,13 +290,11 @@ def validate_inscription(inscription_id):
 
         try:
             db.session.commit()
-            print(f"✅ Inscription ID {inscription_id} validée dans la BDD.")
             send_validation_email(inscription)
             flash(f"L'inscription #{inscription_id} de {inscription.nom} a été validée et l'e-mail a été envoyé.", 'success')
 
         except Exception as e:
             db.session.rollback()
-            print(f"❌ ERREUR lors de la validation: {e}")
             flash(f"Erreur lors de la validation: {e}", 'danger')
 
     return redirect(url_for('admin_dashboard'))
@@ -340,7 +338,7 @@ def export_inscriptions():
     return response
 
 
-# --- NOUVELLES ROUTES CRUD (Modifier/Supprimer) ---
+# --- ROUTES CRUD (Modifier/Supprimer) ---
 
 @app.route('/admin/edit/<int:inscription_id>', methods=['GET', 'POST'])
 @login_required
@@ -353,8 +351,10 @@ def edit_inscription(inscription_id):
             inscription.nom = request.form.get('nom')
             inscription.prenom = request.form.get('prenom')
             inscription.datenaissance = request.form.get('datenaissance')
+            # Les champs 'telephone' et 'email' peuvent échouer s'ils existent déjà
             inscription.telephone = request.form.get('telephone')
             inscription.email = request.form.get('email')
+            
             inscription.formation = request.form.get('formation')
             inscription.etablissement_actuel = request.form.get('etablissement_actuel')
             inscription.formation_option = request.form.get('formation_option')
@@ -380,8 +380,7 @@ def edit_inscription(inscription_id):
 
         except Exception as e:
             db.session.rollback()
-            flash(f"Erreur lors de la modification : {e}", 'danger')
-            print(f"❌ ERREUR LORS DE LA MODIFICATION : {e}")
+            flash(f"Erreur lors de la modification : Le téléphone ou l'email existe peut-être déjà. ({e})", 'danger')
             return redirect(url_for('edit_inscription', inscription_id=inscription.id))
 
     # Affichage du formulaire de modification (méthode GET)
@@ -398,16 +397,14 @@ def delete_inscription(inscription_id):
         db.session.delete(inscription)
         db.session.commit()
         flash(f"L'inscription de {nom_complet} (ID {inscription_id}) a été supprimée définitivement.", 'warning')
-        print(f"🗑️ Inscription ID {inscription_id} supprimée par {current_user.username}")
         
     except Exception as e:
         db.session.rollback()
         flash(f"Erreur lors de la suppression: {e}", 'danger')
-        print(f"❌ ERREUR LORS DE LA SUPPRESSION : {e}")
 
     return redirect(url_for('admin_dashboard'))
 
-# --- LANCEMENT DU SERVEUR CORRIGÉ ---
+# --- LANCEMENT DU SERVEUR ---
 if __name__ == '__main__':
     with app.app_context():
         db.create_all() 
