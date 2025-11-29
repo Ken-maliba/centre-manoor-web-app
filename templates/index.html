@@ -66,7 +66,7 @@
         .photo-card img {
             width: 100%;
             height: 200px;
-            object-fit: cover; /* Assure que l'image couvre la zone sans déformation pour les vignettes */
+            object-fit: cover; /* Assure que l'image couvre la zone sans déformation */
         }
 
         .card-caption {
@@ -86,7 +86,7 @@
             margin-bottom: 0;
         }
         
-        /* STYLES POUR LA LIGHTBOX / MODAL (MISE À JOUR FINALE) */
+        /* STYLES POUR LA LIGHTBOX / MODAL */
         .modal {
             display: none; /* Masqué par défaut */
             position: fixed;
@@ -95,63 +95,53 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto; /* Permet le défilement si le contenu est trop grand */
+            overflow: auto;
             background-color: rgba(0, 0, 0, 0.9); /* Fond semi-transparent noir */
             justify-content: center;
             align-items: center;
-            flex-direction: column; /* Organise image et légende en colonne */
-            padding: 20px; /* Ajoute un peu de marge autour du contenu */
-            box-sizing: border-box; /* Inclut le padding dans la taille du modal */
+            flex-direction: column;
         }
 
         .modal-content {
             margin: auto;
-            display: flex; /* Utilise flex pour l'image à l'intérieur */
-            justify-content: center;
-            align-items: center;
-            width: 90%; /* Prend 90% de la largeur du parent */
-            max-width: 900px; /* Augmenté pour des images plus grandes */
-            max-height: 80vh; /* Prend jusqu'à 80% de la hauteur de la fenêtre visible */
+            display: block;
+            width: 90%;
+            max-width: 700px;
             border-radius: 8px;
-            overflow: hidden; /* Cache ce qui dépasse */
+            overflow: hidden;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
             animation-name: zoom;
             animation-duration: 0.6s;
-            background-color: black; /* Fond noir pour les barres si l'image n'est pas pleine */
         }
 
         .modal-content img {
             width: 100%;
-            height: 100%; /* L'image remplit la taille du modal-content */
-            object-fit: contain; /* Conserve les proportions, image entière visible */
+            height: auto;
             display: block;
         }
 
         .modal-caption {
-            margin: 15px auto 0 auto; /* Marge au-dessus de la légende */
+            margin: auto;
             display: block;
             width: 90%;
-            max-width: 900px; /* Correspond au max-width de l'image */
+            max-width: 700px;
             text-align: center;
-            color: #eee; /* Légèrement plus clair pour contraste sur fond noir */
+            color: #ccc;
             padding: 10px 0;
-            min-height: 40px; 
+            min-height: 40px; /* Espace minimal pour le commentaire */
             font-size: 1.2em;
-            background-color: rgba(0, 0, 0, 0.5); /* Léger fond pour la légende */
-            border-radius: 5px;
         }
 
         /* Le bouton de fermeture (X) */
         .close {
-            position: fixed; /* Fixé par rapport à la fenêtre */
-            top: 20px;
-            right: 40px;
+            position: absolute;
+            top: 15px;
+            right: 35px;
             color: #f1f1f1;
-            font-size: 50px; /* Légèrement plus grand */
+            font-size: 40px;
             font-weight: bold;
             transition: 0.3s;
             cursor: pointer;
-            z-index: 10001; /* Au-dessus de tout */
         }
 
         .close:hover,
@@ -304,9 +294,9 @@
                 </div>
 
                 <div class="photo-card" 
-                     data-src="{{ url_for('static', filename='controle_tension.jpg') }}"
+                     data-src="{{ url_for('static', filename='IMG-20251128-WA0032.jpg') }}"
                      data-caption="Consultation Médicale : Prise de tension et suivi patient, l'empathie au cœur des soins.">
-                    <img src="{{ url_for('static', filename='controle_tension.jpg') }}" alt="Contrôle de tension">
+                    <img src="{{ url_for('static', filename='IMG-20251128-WA0032.jpg') }}" alt="Contrôle de tension">
                     <div class="card-caption">
                         <h4>Consultation Médicale</h4>
                         <p>Nos étudiants apprennent les gestes essentiels, comme la prise de tension, avec professionnalisme et bienveillance.</p>
@@ -314,9 +304,9 @@
                 </div>
 
                 <div class="photo-card" 
-                     data-src="{{ url_for('static', filename='microscope_labo.jpg') }}"
+                     data-src="{{ url_for('static', filename='IMG-20251128-WA0040.jpg') }}"
                      data-caption="Analyses en Laboratoire : Concentration et précision pour des diagnostics fiables sous le microscope.">
-                    <img src="{{ url_for('static', filename='microscope_labo.jpg') }}" alt="Utilisation du microscope en laboratoire">
+                    <img src="{{ url_for('static', filename='IMG-20251128-WA0040.jpg') }}" alt="Utilisation du microscope en laboratoire">
                     <div class="card-caption">
                         <h4>Analyses en Laboratoire</h4>
                         <p>Nos futurs techniciens maîtrisent l'utilisation du microscope pour des analyses précises et des diagnostics fiables.</p>
@@ -324,9 +314,9 @@
                 </div>
 
                 <div class="photo-card" 
-                     data-src="{{ url_for('static', filename='prelevement_sanguin.jpg') }}"
+                     data-src="{{ url_for('static', filename='IMG-20251128-WA0039.jpg') }}"
                      data-caption="Préparation au Soin : Maîtrise des techniques de prélèvement pour des analyses essentielles.">
-                    <img src="{{ url_for('static', filename='prelevement_sanguin.jpg') }}" alt="Préparation d'une injection">
+                    <img src="{{ url_for('static', filename='IMG-20251128-WA0039.jpg') }}" alt="Préparation d'une injection">
                     <div class="card-caption">
                         <h4>Préparation au Soin</h4>
                         <p>La précision du geste : une étape fondamentale dans l'apprentissage des prélèvements et injections.</p>
@@ -334,9 +324,9 @@
                 </div>
 
                 <div class="photo-card" 
-                     data-src="{{ url_for('static', filename='futur_professionnel.jpg') }}"
+                     data-src="{{ url_for('static', filename='IMG-20251128-WA0020.jpg') }}"
                      data-caption="Future Génération de Soignants : Un avenir prometteur pour nos étudiants, souriants et dévoués.">
-                    <img src="{{ url_for('static', filename='futur_professionnel.jpg') }}" alt="Jeune professionnel de la santé souriant">
+                    <img src="{{ url_for('static', filename='IMG-20251128-WA0020.jpg') }}" alt="Jeune professionnel de la santé souriant">
                     <div class="card-caption">
                         <h4>Future Génération</h4>
                         <p>Nos étudiants représentent l'avenir de la santé : souriants, compétents et prêts à faire la différence.</p>
@@ -347,8 +337,8 @@
         </div>
 
         <div id="formulaire-content" class="content-section" style="display: none;">
-            <h2 style="text-align: center; color: var(--color-primary);">Formulaire de Pré-Inscription</h2> 
-            <p class="note" style="text-align: center;">Veuillez remplir le formulaire ci-dessous pour lancer votre pré-inscription. Les frais de dossier sont de 5 000 F CFA.</p>
+            <h2 style="text-align: center; color: var(--color-primary); display: none;">Formulaire de Pré-Inscription</h2> 
+            <p class="note" style="text-align: center; display: none;">Veuillez remplir le formulaire ci-dessous pour lancer votre pré-inscription. Les frais de dossier sont de 5 000 F CFA.</p>
             
             <form action="/soumettre-inscription" method="POST" class="form-grid">
                 
