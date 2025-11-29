@@ -15,7 +15,7 @@
         
         /* STYLES DU BODY ET DU FOND D'ÉCRAN */
         body {
-            /* UTILISATION DU CHEMIN STATIQUE DIRECT POUR CONTOURNER LES PROBLÈMES DE FLASK/RENDER */
+            /* CHEMIN STATIQUE DIRECT POUR ÉVITER LES PROBLÈMES DE CACHE/FLASK */
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
                               url("/static/diplomes_manoor.jpg"); 
             
@@ -128,7 +128,7 @@
         </div>
 
         <div id="formulaire-content" class="content-section" style="display: none;">
-            <h2 style="text-align: center; color: var(--color-primary);">Formulaire de Pré-Inscription</h2>
+            <h2 style="text-align: center; color: var(--color-primary); display: none;">Formulaire de Pré-Inscription</h2> 
             <p class="note" style="text-align: center;">Veuillez remplir le formulaire ci-dessous pour lancer votre pré-inscription. Les frais de dossier sont de 5 000 F CFA.</p>
             
             <form action="/soumettre-inscription" method="POST" class="form-grid">
