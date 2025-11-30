@@ -41,14 +41,16 @@ class Inscription(db.Model):
     nom = db.Column(db.String(50), nullable=False)
     prenom = db.Column(db.String(50), nullable=False)
     date_naissance = db.Column(db.Date, nullable=False)
-    telephone = db.Column(db.String(8), unique=True, nullable=False)
+    # Rendre unique pour éviter les doublons accidentels du formulaire
+    telephone = db.Column(db.String(8), unique=True, nullable=False) 
     email = db.Column(db.String(120), unique=True, nullable=False)
     etablissement_actuel = db.Column(db.String(100), nullable=True)
     niveau_etude = db.Column(db.String(50), nullable=False)
     
-    # NOUVELLE COLONNE pour la formation principale
+    # CORRECTION CRUCIALE : Colonne pour le select (Formation demandée)
     formation_principale = db.Column(db.String(100), nullable=False) 
     
+    # Colonne pour les boutons radio (Option : Groupe/Individuelle)
     formation_option = db.Column(db.String(50), nullable=False)
     methode_paiement = db.Column(db.String(50), nullable=False)
     date_soumission = db.Column(db.DateTime, default=datetime.utcnow)
@@ -98,7 +100,8 @@ def admin_login():
     if current_user.is_authenticated:
         return redirect(url_for('admin.index'))
     
-    # Ceci est juste une page de connexion simple (pas de formulaire HTML fourni)
+    # Cette route doit fournir la logique pour le template admin_login.html (non fourni)
+    # L'utilisateur doit s'identifier pour accéder à /admin
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -111,8 +114,8 @@ def admin_login():
         else:
             flash('Échec de la connexion. Vérifiez le nom d\'utilisateur et le mot de passe.', 'error')
             
-    # Pour la connexion, on redirige l'utilisateur vers la page de connexion par défaut de Flask-Admin
-    return render_template('admin_login.html') # Assurez-vous d'avoir ce template ou utilisez un simple template
+    # Ceci est un simple placeholder pour la page de connexion
+    return render_template('admin_login.html') 
 
 @app.route('/admin/logout')
 @login_required
@@ -130,14 +133,13 @@ def index():
     
     if request.method == 'POST':
         
-        # Liste des champs OBLIGATOIRES (Mise à jour pour correspondre à index.html)
+        # CORRECTION : Liste des champs OBLIGATOIRES mise à jour 
         required_fields = [
             'nom', 'prenom', 'date_naissance', 'telephone', 'email', 
             'niveau_etude', 'formation_principale', 'formation_option', 
             'methode_paiement'
         ]
         
-        # S'assurer que les données sont bien dans request.form (ou request.json)
         data = request.form
         
         # 1. Vérification des champs manquants
@@ -146,7 +148,7 @@ def index():
             error_message = f"Le champ {', '.join(missing_fields)} est manquant ou vide."
             return redirect(url_for('echec_inscription', error_message=error_message))
         
-        # 2. Extraction des données (y compris le nouveau champ)
+        # 2. Extraction des données (y compris le champ renommé)
         nom = data.get('nom')
         prenom = data.get('prenom')
         date_naissance_str = data.get('date_naissance')
@@ -155,7 +157,7 @@ def index():
         etablissement_actuel = data.get('etablissement_actuel')
         niveau_etude = data.get('niveau_etude')
         
-        # LE CHAMP QUI A ÉTÉ RENOMMÉ DANS INDEX.HTML
+        # EXTRACTION DU CHAMP RENOMMÉ (formation_principale)
         formation_principale = data.get('formation_principale') 
         
         formation_option = data.get('formation_option')
@@ -183,7 +185,7 @@ def index():
                 email=email,
                 etablissement_actuel=etablissement_actuel,
                 niveau_etude=niveau_etude,
-                formation_principale=formation_principale, # NOUVEAU NOM DU CHAMP
+                formation_principale=formation_principale, # NOUVEAU NOM DU CHAMP UTILISÉ
                 formation_option=formation_option,
                 methode_paiement=methode_paiement,
                 date_soumission=datetime.now(),
@@ -196,17 +198,17 @@ def index():
             db.session.commit()
             
             # 6. Redirection vers le succès
-            return redirect(url_for('succes_inscription'))
+            # Retrait du paramètre inscription_id inutile pour le succès
+            return redirect(url_for('succes_inscription')) 
 
         except ValueError as e:
             # Erreur de format de date
             error_message = f"Erreur de format des données : {str(e)}"
+            db.session.rollback() # S'assurer que la transaction est annulée en cas d'erreur de date
             return redirect(url_for('echec_inscription', error_message=error_message))
         except Exception as e:
-            # Erreur d'enregistrement critique (ex: base de données)
+            # Erreur d'enregistrement critique (doublon, base de données non existante, etc.)
             db.session.rollback()
-            # Pour l'affichage, nous utilisons un message d'erreur générique mais critique
-            # Le log de Render affichera la vraie erreur SQL ou autre
             error_message = f"Erreur d'enregistrement critique. Détail technique : {str(e)}"
             return redirect(url_for('echec_inscription', error_message=error_message))
 
@@ -224,9 +226,10 @@ def echec_inscription():
     return render_template('echec_inscription.html', error_message=error_message)
 
 # ====================================================
-# INITIALISATION DE LA BASE DE DONNÉES
+# INITIALISATION DE LA BASE DE DONNÉES (Pour le local, la commande shell ne marche pas)
 # ====================================================
 
+# Ceci est la commande CLI qui n'a pas fonctionné sur votre Render Shell
 @app.cli.command("init-db")
 def init_db():
     """Crée les tables de la base de données."""
@@ -236,7 +239,6 @@ def init_db():
 
 if __name__ == '__main__':
     # Ceci est généralement utilisé pour le développement local
-    # Sur Render, le serveur Gunicorn gère le lancement
     with app.app_context():
         db.create_all()
     app.run(debug=True)
