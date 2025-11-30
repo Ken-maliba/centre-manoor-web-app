@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, request, redirect, url_for, render_template, abort, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
@@ -15,7 +14,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 # Charge les variables d'environnement depuis .env (utile en développement local)
-load_dotenv()
+# Assurez-vous d'avoir un fichier .env si vous développez en local
+load_dotenv() 
 
 app = Flask(__name__)
 
@@ -26,9 +26,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete_pour_les
 # 1. Récupération de l'URL de la base de données (Render/PostgreSQL)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# 2. Correction nécessaire pour SQLAlchemy : Render utilise 'postgres://', 
+# 2. Correction nécessaire pour SQLAlchemy : Render utilise parfois 'postgres://', 
 #    mais SQLAlchemy a besoin de 'postgresql://' pour se connecter correctement.
-#    (Cette ligne est importante si vous testez en local avec une DB Render)
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
@@ -133,7 +132,8 @@ L'Administration du Centre Manoor
         logging.info(f"✅ EMAIL ENVOYÉ à {inscription.email}")
         return True
     except Exception as e:
-        logging.error(f"❌ ÉCHEC ENVOI EMAIL à {inscription.email}: {e}")
+        # Ceci peut se produire si MAIL_PASSWORD est faux
+        logging.error(f"❌ ÉCHEC ENVOI EMAIL à {inscription.email}: {e}") 
         flash(f"Erreur d'envoi d'e-mail (vérifier MAIL_PASSWORD): {e}", 'danger')
         return False
 
@@ -148,7 +148,7 @@ def create_default_admin():
         logging.info("👤 Compte administrateur par défaut créé : adminmanoor / motdepasse2025")
 
 
-# --- ROUTES FRONTEND (Identiques) ---
+# --- ROUTES FRONTEND ---
 URL_PAGE_SUCCES = '/succes-inscription'
 
 @app.route('/')
@@ -159,7 +159,7 @@ def index():
 @app.route('/soumettre-inscription', methods=['POST'])
 def soumettre_inscription():
     if request.method == 'POST':
-        # 1. Récupération des données du formulaire (Même logique, les noms de champs sont corrects)
+        # 1. Récupération des données du formulaire
         donnees_formulaire = {
             "nom": request.form.get('nom'),
             "prenom": request.form.get('prenom'),
@@ -198,7 +198,7 @@ def soumettre_inscription():
 
         except Exception as e:
             db.session.rollback()
-            # Log l'erreur pour aider au diagnostic 
+            # Log l'erreur exacte pour le diagnostic 
             logging.error(f"❌ ÉCHEC ENREGISTREMENT DB: {e}") 
             # Redirige vers la page d'échec
             return redirect(url_for('page_echec_inscription'))
@@ -210,50 +210,125 @@ def soumettre_inscription():
 
 @app.route('/succes-inscription')
 def page_succes():
-    return render_template('succes_inscription.html') # Assurez-vous d'avoir ce template
+    return render_template('succes_inscription.html')
 
 
 @app.route('/echec-inscription')
 def page_echec_inscription():
-    return render_template('echec_inscription.html') # Assurez-vous d'avoir ce template
+    return render_template('echec_inscription.html')
 
 
-# --- ROUTES D'AUTHENTIFICATION, ADMIN, CRUD (Identiques) ---
-# ... (Gardez toutes les autres routes : login, logout, admin_dashboard, validate, export, edit, delete) ...
-
+# --- ROUTES D'AUTHENTIFICATION ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # ... (code login) ...
-    pass # Placeholder pour les autres routes non affichées
+    if current_user.is_authenticated:
+        return redirect(url_for('admin_dashboard'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Connexion réussie.', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Identifiants invalides.', 'danger')
+
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Vous avez été déconnecté.', 'info')
+    return redirect(url_for('index'))
 
 
-# --- NOUVELLE PARTIE CRITIQUE POUR RENDER ---
-def setup_db_and_admin():
-    """Fonction utilitaire pour créer la DB et l'admin dans le contexte de l'application."""
-    with app.app_context():
-        # 1. CRÉATION DE LA TABLE MANQUANTE (Inscription et User)
+# --- ROUTES ADMIN ---
+@app.route('/admin')
+@login_required
+def admin_dashboard():
+    inscriptions = Inscription.query.all()
+    # Classement par date de soumission (les plus récentes en premier)
+    inscriptions.sort(key=lambda x: x.date_soumission, reverse=True)
+    return render_template('admin_dashboard.html', inscriptions=inscriptions)
+
+@app.route('/admin/validate/<int:inscription_id>', methods=['POST'])
+@login_required
+def validate_inscription(inscription_id):
+    inscription = Inscription.query.get_or_404(inscription_id)
+    if not inscription.is_validated:
+        inscription.is_validated = True
+        inscription.validation_date = datetime.now()
+        
         try:
-            db.create_all() 
-            logging.info("✅ Tables de la base de données vérifiées/créées.")
+            db.session.commit()
+            if send_validation_email(inscription):
+                flash(f"Inscription de {inscription.nom} validée et email envoyé.", 'success')
+            else:
+                flash(f"Inscription de {inscription.nom} validée, mais l'envoi de l'email a échoué (vérifiez MAIL_PASSWORD).", 'warning')
         except Exception as e:
-             logging.error(f"❌ ÉCHEC FATAL lors de db.create_all(): {e}")
+            db.session.rollback()
+            flash(f"Erreur lors de la validation : {e}", 'danger')
+            
+    return redirect(url_for('admin_dashboard'))
 
-        # 2. CRÉATION DE L'UTILISATEUR ADMIN PAR DÉFAUT
-        try:
-            create_default_admin()
-            logging.info("✅ Utilisateur admin par défaut vérifié/créé.")
-        except Exception as e:
-             logging.error(f"❌ ÉCHEC FATAL lors de la création de l'admin: {e}")
-             
-# Point d'entrée pour Gunicorn (Render)
-# Gunicorn appellera cette fonction, assurant la création de la table AVANT de servir les requêtes.
-def gunicorn_startup():
-    setup_db_and_admin()
-    return app
+@app.route('/admin/delete/<int:inscription_id>', methods=['POST'])
+@login_required
+def delete_inscription(inscription_id):
+    inscription = Inscription.query.get_or_404(inscription_id)
+    try:
+        db.session.delete(inscription)
+        db.session.commit()
+        flash(f"Inscription de {inscription.nom} supprimée.", 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression : {e}", 'danger')
+        
+    return redirect(url_for('admin_dashboard'))
 
-# Point d'entrée pour le développement local (python app.py)
+@app.route('/admin/export/csv')
+@login_required
+def export_csv():
+    inscriptions = Inscription.query.all()
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+
+    # En-tête du fichier CSV
+    writer.writerow([
+        'ID', 'Nom', 'Prénom', 'Date de Naissance', 'Téléphone', 'Email', 
+        'Formation', 'Option', 'Niveau d\'étude', 'Établissement Actuel', 
+        'Méthode Paiement', 'Date Soumission', 'Validée', 'Date Validation'
+    ])
+
+    # Données
+    for i in inscriptions:
+        writer.writerow([
+            i.id, i.nom, i.prenom, i.datenaissance, i.telephone, i.email, 
+            i.formation, i.formation_option, i.niveauetude, i.etablissement_actuel, 
+            i.methode_paiement, i.date_soumission.strftime('%Y-%m-%d %H:%M:%S') if i.date_soumission else '', 
+            'Oui' if i.is_validated else 'Non', 
+            i.validation_date.strftime('%Y-%m-%d %H:%M:%S') if i.validation_date else ''
+        ])
+
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=inscriptions_manoor.csv"
+    response.headers["Content-type"] = "text/csv; charset=utf-8"
+    return response
+
+
+# --- PARTIE DE DÉMARRAGE CRITIQUE (Mise à Jour) ---
+
 if __name__ == '__main__':
-    setup_db_and_admin()
-    app.run(debug=True)
-
-# FIN DU FICHIER
+    # Ceci s'exécute uniquement si vous lancez 'python app.py' en local.
+    # Pour Render, cela est souvent sauté, d'où la nécessité de la commande 'flask shell'.
+    try:
+        with app.app_context():
+            db.create_all() # Tente de créer les tables (Inscription et User)
+            create_default_admin() # Crée l'admin si inexistant
+        app.run(debug=True)
+    except Exception as e:
+        logging.error(f"❌ ERREUR FATALE AU DÉMARRAGE LOCAL : {e}")
+        print("Vérifiez votre DATABASE_URL ou votre configuration SQLite.")
