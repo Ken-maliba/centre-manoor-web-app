@@ -9,6 +9,10 @@ from datetime import datetime
 import io
 import csv
 from dotenv import load_dotenv
+import logging # Import pour un meilleur logging
+
+# Configuration du logging pour afficher les erreurs en console
+logging.basicConfig(level=logging.INFO)
 
 # Charge les variables d'environnement depuis .env (utile en développement local)
 load_dotenv()
@@ -31,14 +35,17 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- CONFIGURATION D'EMAIL (À PERSONNALISER) ---
-# NOTE: Ces variables doivent être définies dans les variables d'environnement sur Render.
+# --- CONFIGURATION D'EMAIL (CORRIGÉE) ---
+# Les variables MAIL_USERNAME et MAIL_PASSWORD doivent être définies sur Render.
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = 'Centre Manoor <VOTRE_EMAIL_SMTP@gmail.com>'
+
+# Utilisation dynamique de MAIL_USERNAME comme expéditeur par défaut
+MAIL_SENDER = os.environ.get('MAIL_USERNAME', 'centremmanoor@gmail.com')
+app.config['MAIL_DEFAULT_SENDER'] = f'Centre Manoor <{MAIL_SENDER}>'
 
 db = SQLAlchemy(app)
 mail = Mail(app)
@@ -121,9 +128,10 @@ L'Administration du Centre Manoor
 """
         )
         mail.send(msg)
+        logging.info(f"✅ EMAIL ENVOYÉ à {inscription.email}")
         return True
     except Exception as e:
-        print(f"❌ ÉCHEC ENVOI EMAIL à {inscription.email}: {e}")
+        logging.error(f"❌ ÉCHEC ENVOI EMAIL à {inscription.email}: {e}")
         return False
 
 
@@ -134,7 +142,7 @@ def create_default_admin():
         admin_user.set_password('motdepasse2025')  # MOT DE PASSE PAR DÉFAUT
         db.session.add(admin_user)
         db.session.commit()
-        print("👤 Compte administrateur par défaut créé : adminmanoor / motdepasse2025")
+        logging.info("👤 Compte administrateur par défaut créé : adminmanoor / motdepasse2025")
 
 
 # --- ROUTES FRONTEND ---
@@ -185,10 +193,14 @@ def soumettre_inscription():
 
             db.session.add(nouvelle_inscription)
             db.session.commit()
+            logging.info(f"💾 Inscription enregistrée pour {nouvelle_inscription.email}")
 
         except Exception as e:
             db.session.rollback()
-            # Si erreur, c'est probablement un téléphone/email déjà utilisé
+            # Log l'erreur pour aider au diagnostic sur Render
+            logging.error(f"❌ ÉCHEC ENREGISTREMENT DB: {e}") 
+            # Si l'erreur est liée à un champ unique (téléphone/email déjà utilisé), 
+            # ou si la connexion DB échoue, on redirige vers l'échec.
             return redirect(url_for('page_echec_inscription'))
 
         return redirect(URL_PAGE_SUCCES)
@@ -223,8 +235,8 @@ def page_echec_inscription():
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
             <div style="max-width: 600px; margin: auto; padding: 30px; border: 1px solid #ff6347; border-radius: 8px;">
                 <h1>❌ Échec de l'Inscription</h1>
-                <p>Une erreur est survenue lors de l'enregistrement de votre candidature. Cela peut être dû à un email ou un numéro de téléphone déjà utilisé.</p>
-                <p style="color: #ff6347; font-weight: bold; margin-top: 15px;">Veuillez vérifier vos informations ou contacter le centre.</p>
+                <p>Une erreur est survenue lors de l'enregistrement de votre candidature. Cela peut être dû à un email ou un numéro de téléphone déjà utilisé, ou à un problème de connexion au serveur.</p>
+                <p style="color: #ff6347; font-weight: bold; margin-top: 15px;">Veuillez vérifier vos informations et réessayer. Si l'échec persiste, contactez le centre.</p>
                 <a href="/" style="display: inline-block; margin-top: 30px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 50px;">Retour à l'Accueil</a>
             </div>
         </body>
@@ -295,6 +307,7 @@ def validate_inscription(inscription_id):
 
         except Exception as e:
             db.session.rollback()
+            logging.error(f"❌ Erreur lors de la validation DB/Email: {e}")
             flash(f"Erreur lors de la validation: {e}", 'danger')
 
     return redirect(url_for('admin_dashboard'))
@@ -380,6 +393,7 @@ def edit_inscription(inscription_id):
 
         except Exception as e:
             db.session.rollback()
+            logging.error(f"❌ Erreur lors de la modification (Edit): {e}")
             flash(f"Erreur lors de la modification : Le téléphone ou l'email existe peut-être déjà. ({e})", 'danger')
             return redirect(url_for('edit_inscription', inscription_id=inscription.id))
 
@@ -400,6 +414,7 @@ def delete_inscription(inscription_id):
         
     except Exception as e:
         db.session.rollback()
+        logging.error(f"❌ Erreur lors de la suppression: {e}")
         flash(f"Erreur lors de la suppression: {e}", 'danger')
 
     return redirect(url_for('admin_dashboard'))
