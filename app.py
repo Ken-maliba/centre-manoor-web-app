@@ -9,7 +9,7 @@ from datetime import datetime
 import io
 import csv
 from dotenv import load_dotenv
-import logging # Import pour un meilleur logging
+import logging 
 
 # Configuration du logging pour afficher les erreurs en console
 logging.basicConfig(level=logging.INFO)
@@ -28,6 +28,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 # 2. Correction nécessaire pour SQLAlchemy : Render utilise 'postgres://', 
 #    mais SQLAlchemy a besoin de 'postgresql://' pour se connecter correctement.
+#    (Cette ligne est importante si vous testez en local avec une DB Render)
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
@@ -35,13 +36,13 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- CONFIGURATION D'EMAIL (CORRIGÉE) ---
-# Les variables MAIL_USERNAME et MAIL_PASSWORD doivent être définies sur Render.
+# --- CONFIGURATION D'EMAIL ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+# Note : MAIL_PASSWORD DOIT ÊTRE UN MOT DE PASSE D'APPLICATION GOOGLE (16 caractères)
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') 
 
 # Utilisation dynamique de MAIL_USERNAME comme expéditeur par défaut
 MAIL_SENDER = os.environ.get('MAIL_USERNAME', 'centremmanoor@gmail.com')
@@ -67,7 +68,8 @@ class Inscription(db.Model):
     nom = db.Column(db.String(80), nullable=False)
     prenom = db.Column(db.String(80), nullable=False)
     datenaissance = db.Column(db.String(10))
-    telephone = db.Column(db.String(8), unique=True, nullable=False)
+    # Ces champs DOIVENT être uniques pour éviter les doublons 
+    telephone = db.Column(db.String(8), unique=True, nullable=False) 
     email = db.Column(db.String(120), unique=True, nullable=False)
     formation = db.Column(db.String(50), nullable=False)
     
@@ -132,6 +134,7 @@ L'Administration du Centre Manoor
         return True
     except Exception as e:
         logging.error(f"❌ ÉCHEC ENVOI EMAIL à {inscription.email}: {e}")
+        flash(f"Erreur d'envoi d'e-mail (vérifier MAIL_PASSWORD): {e}", 'danger')
         return False
 
 
@@ -139,26 +142,24 @@ def create_default_admin():
     """Crée un compte admin par défaut si aucun n'existe."""
     if User.query.filter_by(username='adminmanoor').first() is None:
         admin_user = User(username='adminmanoor')
-        admin_user.set_password('motdepasse2025')  # MOT DE PASSE PAR DÉFAUT
+        admin_user.set_password('motdepasse2025') # MOT DE PASSE PAR DÉFAUT
         db.session.add(admin_user)
         db.session.commit()
         logging.info("👤 Compte administrateur par défaut créé : adminmanoor / motdepasse2025")
 
 
-# --- ROUTES FRONTEND ---
+# --- ROUTES FRONTEND (Identiques) ---
 URL_PAGE_SUCCES = '/succes-inscription'
-
 
 @app.route('/')
 def index():
-    # Note: Flask utilise le fichier index.html qui a toutes les sections masquées.
     return render_template('index.html')
 
 
 @app.route('/soumettre-inscription', methods=['POST'])
 def soumettre_inscription():
     if request.method == 'POST':
-        # 1. Récupération des données du formulaire
+        # 1. Récupération des données du formulaire (Même logique, les noms de champs sont corrects)
         donnees_formulaire = {
             "nom": request.form.get('nom'),
             "prenom": request.form.get('prenom'),
@@ -197,10 +198,9 @@ def soumettre_inscription():
 
         except Exception as e:
             db.session.rollback()
-            # Log l'erreur pour aider au diagnostic sur Render
+            # Log l'erreur pour aider au diagnostic 
             logging.error(f"❌ ÉCHEC ENREGISTREMENT DB: {e}") 
-            # Si l'erreur est liée à un champ unique (téléphone/email déjà utilisé), 
-            # ou si la connexion DB échoue, on redirige vers l'échec.
+            # Redirige vers la page d'échec
             return redirect(url_for('page_echec_inscription'))
 
         return redirect(URL_PAGE_SUCCES)
@@ -210,220 +210,50 @@ def soumettre_inscription():
 
 @app.route('/succes-inscription')
 def page_succes():
-    return """
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head><title>Succès</title></head>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-            <div style="max-width: 600px; margin: auto; padding: 30px; border: 1px solid #007bff; border-radius: 8px;">
-                <h1>✅ Pré-Inscription Reçue et Enregistrée !</h1>
-                <p>Merci de votre intérêt pour le Centre Manoor. Votre candidature a été enregistrée dans notre système.</p>
-                <p style="color: #28a745; font-weight: bold; margin-top: 15px;">Veuillez vérifier votre email pour les instructions de paiement et de concours.</p>
-                <a href="/" style="display: inline-block; margin-top: 30px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 50px;">Retour à l'Accueil</a>
-            </div>
-        </body>
-        </html>
-    """
+    return render_template('succes_inscription.html') # Assurez-vous d'avoir ce template
 
 
 @app.route('/echec-inscription')
 def page_echec_inscription():
-    return """
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head><title>Échec</title></head>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-            <div style="max-width: 600px; margin: auto; padding: 30px; border: 1px solid #ff6347; border-radius: 8px;">
-                <h1>❌ Échec de l'Inscription</h1>
-                <p>Une erreur est survenue lors de l'enregistrement de votre candidature. Cela peut être dû à un email ou un numéro de téléphone déjà utilisé, ou à un problème de connexion au serveur.</p>
-                <p style="color: #ff6347; font-weight: bold; margin-top: 15px;">Veuillez vérifier vos informations et réessayer. Si l'échec persiste, contactez le centre.</p>
-                <a href="/" style="display: inline-block; margin-top: 30px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 50px;">Retour à l'Accueil</a>
-            </div>
-        </body>
-        </html>
-    """
+    return render_template('echec_inscription.html') # Assurez-vous d'avoir ce template
 
 
-# --- ROUTES D'AUTHENTIFICATION ---
+# --- ROUTES D'AUTHENTIFICATION, ADMIN, CRUD (Identiques) ---
+# ... (Gardez toutes les autres routes : login, logout, admin_dashboard, validate, export, edit, delete) ...
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('admin_dashboard'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        user = User.query.filter_by(username=username).first()
-
-        if user and user.check_password(password):
-            login_user(user)
-            flash("Connexion réussie.", 'success')
-            return redirect(url_for('admin_dashboard'))
-        else:
-            return render_template('login.html', error_message="Nom d'utilisateur ou mot de passe invalide.")
-
-    return render_template('login.html')
+    # ... (code login) ...
+    pass # Placeholder pour les autres routes non affichées
 
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash("Vous avez été déconnecté.", 'info')
-    return redirect(url_for('login'))
-
-
-# --- ROUTES D'ADMINISTRATION SÉCURISÉES ---
-@app.route('/admin')
-@login_required
-def admin_dashboard():
-    # Affiche le tableau de bord (utiliser admin_dashboard.html)
-    inscriptions = Inscription.query.order_by(Inscription.date_soumission.desc()).all()
-    return render_template('admin_dashboard.html', inscriptions=inscriptions)
-
-
-@app.route('/admin/details/<int:inscription_id>')
-@login_required
-def inscription_details(inscription_id):
-    # Affiche les détails (utiliser inscription_details.html)
-    inscription = Inscription.query.get_or_404(inscription_id)
-    return render_template('inscription_details.html', inscription=inscription)
-
-
-@app.route('/admin/validate/<int:inscription_id>')
-@login_required
-def validate_inscription(inscription_id):
-    inscription = Inscription.query.get_or_404(inscription_id)
-
-    if not inscription.is_validated:
-        inscription.is_validated = True
-        inscription.validation_date = datetime.now()
-
-        try:
-            db.session.commit()
-            send_validation_email(inscription)
-            flash(f"L'inscription #{inscription_id} de {inscription.nom} a été validée et l'e-mail a été envoyé.", 'success')
-
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"❌ Erreur lors de la validation DB/Email: {e}")
-            flash(f"Erreur lors de la validation: {e}", 'danger')
-
-    return redirect(url_for('admin_dashboard'))
-
-
-@app.route('/admin/export')
-@login_required
-def export_inscriptions():
-    """Exporte toutes les inscriptions vers un fichier CSV."""
-
-    inscriptions = Inscription.query.all()
-
-    csv_header = [
-        'ID', 'NOM', 'PRENOM', 'DATE_NAISSANCE', 'TELEPHONE', 'EMAIL',
-        'FORMATION', 'OPTION', 'NIVEAU_ETUDE', 'ETABLISSEMENT_ACTUEL', 'METHODE_PAIEMENT',
-        'DATE_SOUMISSION', 'VALIDEE', 'DATE_VALIDATION'
-    ]
-
-    csv_data = [csv_header]
-    for ins in inscriptions:
-        row = [
-            ins.id, ins.nom, ins.prenom, ins.datenaissance, ins.telephone, ins.email,
-            ins.formation, ins.formation_option, ins.niveauetude, ins.etablissement_actuel, ins.methode_paiement,
-            ins.date_soumission.strftime('%Y-%m-%d %H:%M:%S'),
-            'OUI' if ins.is_validated else 'NON',
-            ins.validation_date.strftime('%Y-%m-%d %H:%M:%S') if ins.validation_date else ''
-        ]
-        csv_data.append(row)
-
-    si = io.StringIO()
-    cw = csv.writer(si, delimiter=';')
-    cw.writerows(csv_data)
-    output = si.getvalue().encode('utf-8')
-
-    response = make_response(output)
-
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    response.headers["Content-Disposition"] = f"attachment; filename=inscriptions_manoor_{timestamp}.csv"
-    response.headers["Content-type"] = "text/csv; charset=utf-8"
-
-    return response
-
-
-# --- ROUTES CRUD (Modifier/Supprimer) ---
-
-@app.route('/admin/edit/<int:inscription_id>', methods=['GET', 'POST'])
-@login_required
-def edit_inscription(inscription_id):
-    inscription = Inscription.query.get_or_404(inscription_id)
-
-    if request.method == 'POST':
-        # Traitement de la soumission du formulaire d'édition
-        try:
-            inscription.nom = request.form.get('nom')
-            inscription.prenom = request.form.get('prenom')
-            inscription.datenaissance = request.form.get('datenaissance')
-            # Les champs 'telephone' et 'email' peuvent échouer s'ils existent déjà
-            inscription.telephone = request.form.get('telephone')
-            inscription.email = request.form.get('email')
-            
-            inscription.formation = request.form.get('formation')
-            inscription.etablissement_actuel = request.form.get('etablissement_actuel')
-            inscription.formation_option = request.form.get('formation_option')
-            inscription.niveauetude = request.form.get('niveauetude')
-            inscription.methode_paiement = request.form.get('methode_paiement')
-            
-            # Gestion du statut de validation
-            is_validated_form = request.form.get('is_validated') == 'on'
-            
-            if is_validated_form and not inscription.is_validated:
-                # Validation manuelle
-                inscription.is_validated = True
-                inscription.validation_date = datetime.now()
-            elif not is_validated_form and inscription.is_validated:
-                # Dévalidation manuelle
-                inscription.is_validated = False
-                inscription.validation_date = None
-
-
-            db.session.commit()
-            flash(f"L'inscription ID {inscription_id} a été mise à jour.", 'success')
-            return redirect(url_for('inscription_details', inscription_id=inscription.id))
-
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"❌ Erreur lors de la modification (Edit): {e}")
-            flash(f"Erreur lors de la modification : Le téléphone ou l'email existe peut-être déjà. ({e})", 'danger')
-            return redirect(url_for('edit_inscription', inscription_id=inscription.id))
-
-    # Affichage du formulaire de modification (méthode GET)
-    return render_template('edit_inscription.html', inscription=inscription)
-
-
-@app.route('/admin/delete/<int:inscription_id>', methods=['POST'])
-@login_required
-def delete_inscription(inscription_id):
-    inscription = Inscription.query.get_or_404(inscription_id)
-    nom_complet = f"{inscription.nom} {inscription.prenom}"
-    
-    try:
-        db.session.delete(inscription)
-        db.session.commit()
-        flash(f"L'inscription de {nom_complet} (ID {inscription_id}) a été supprimée définitivement.", 'warning')
-        
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"❌ Erreur lors de la suppression: {e}")
-        flash(f"Erreur lors de la suppression: {e}", 'danger')
-
-    return redirect(url_for('admin_dashboard'))
-
-# --- LANCEMENT DU SERVEUR ---
-if __name__ == '__main__':
+# --- NOUVELLE PARTIE CRITIQUE POUR RENDER ---
+def setup_db_and_admin():
+    """Fonction utilitaire pour créer la DB et l'admin dans le contexte de l'application."""
     with app.app_context():
-        # Cette partie est essentielle, même si Gunicorn ne l'exécute pas toujours
-        db.create_all() 
-        create_default_admin()
-        
+        # 1. CRÉATION DE LA TABLE MANQUANTE (Inscription et User)
+        try:
+            db.create_all() 
+            logging.info("✅ Tables de la base de données vérifiées/créées.")
+        except Exception as e:
+             logging.error(f"❌ ÉCHEC FATAL lors de db.create_all(): {e}")
+
+        # 2. CRÉATION DE L'UTILISATEUR ADMIN PAR DÉFAUT
+        try:
+            create_default_admin()
+            logging.info("✅ Utilisateur admin par défaut vérifié/créé.")
+        except Exception as e:
+             logging.error(f"❌ ÉCHEC FATAL lors de la création de l'admin: {e}")
+             
+# Point d'entrée pour Gunicorn (Render)
+# Gunicorn appellera cette fonction, assurant la création de la table AVANT de servir les requêtes.
+def gunicorn_startup():
+    setup_db_and_admin()
+    return app
+
+# Point d'entrée pour le développement local (python app.py)
+if __name__ == '__main__':
+    setup_db_and_admin()
     app.run(debug=True)
+
+# FIN DU FICHIER
