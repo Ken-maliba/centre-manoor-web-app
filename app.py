@@ -42,13 +42,13 @@ class Inscription(db.Model):
     prenom = db.Column(db.String(50), nullable=False)
     date_naissance = db.Column(db.Date, nullable=False)
     # Rendre unique pour éviter les doublons accidentels du formulaire
-    telephone = db.Column(db.String(8), unique=True, nullable=False) 
+    telephone = db.Column(db.String(8), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     etablissement_actuel = db.Column(db.String(100), nullable=True)
     niveau_etude = db.Column(db.String(50), nullable=False)
     
-    # CORRECTION CRUCIALE : Colonne pour le select (Formation demandée)
-    formation_principale = db.Column(db.String(100), nullable=False) 
+    # Colonne pour le select (Formation demandée)
+    formation_principale = db.Column(db.String(100), nullable=False)
     
     # Colonne pour les boutons radio (Option : Groupe/Individuelle)
     formation_option = db.Column(db.String(50), nullable=False)
@@ -100,7 +100,6 @@ def admin_login():
     if current_user.is_authenticated:
         return redirect(url_for('admin.index'))
     
-    # Cette route doit fournir la logique pour le template admin_login.html (non fourni)
     # L'utilisateur doit s'identifier pour accéder à /admin
     if request.method == 'POST':
         username = request.form.get('username')
@@ -110,12 +109,13 @@ def admin_login():
         
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('admin.index'))
+            # Redirection vers la page d'administration
+            return redirect(url_for('admin.index')) 
         else:
             flash('Échec de la connexion. Vérifiez le nom d\'utilisateur et le mot de passe.', 'error')
             
     # Ceci est un simple placeholder pour la page de connexion
-    return render_template('admin_login.html') 
+    return render_template('admin_login.html')
 
 @app.route('/admin/logout')
 @login_required
@@ -133,7 +133,7 @@ def index():
     
     if request.method == 'POST':
         
-        # CORRECTION : Liste des champs OBLIGATOIRES mise à jour 
+        # 1. Liste des champs OBLIGATOIRES mise à jour 
         required_fields = [
             'nom', 'prenom', 'date_naissance', 'telephone', 'email', 
             'niveau_etude', 'formation_principale', 'formation_option', 
@@ -142,13 +142,13 @@ def index():
         
         data = request.form
         
-        # 1. Vérification des champs manquants
+        # 2. Vérification des champs manquants
         missing_fields = [field for field in required_fields if not data.get(field)]
         if missing_fields:
             error_message = f"Le champ {', '.join(missing_fields)} est manquant ou vide."
             return redirect(url_for('echec_inscription', error_message=error_message))
         
-        # 2. Extraction des données (y compris le champ renommé)
+        # 3. Extraction des données
         nom = data.get('nom')
         prenom = data.get('prenom')
         date_naissance_str = data.get('date_naissance')
@@ -156,18 +156,15 @@ def index():
         email = data.get('email')
         etablissement_actuel = data.get('etablissement_actuel')
         niveau_etude = data.get('niveau_etude')
-        
-        # EXTRACTION DU CHAMP RENOMMÉ (formation_principale)
-        formation_principale = data.get('formation_principale') 
-        
+        formation_principale = data.get('formation_principale')
         formation_option = data.get('formation_option')
         methode_paiement = data.get('methode_paiement')
 
         try:
-            # 3. Conversion de la date de naissance
+            # 4. Conversion de la date de naissance
             date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date()
             
-            # 4. Vérification des doublons (téléphone et email)
+            # 5. Vérification des doublons (téléphone et email)
             if Inscription.query.filter_by(telephone=telephone).first():
                 error_message = "Ce numéro de téléphone est déjà utilisé."
                 return redirect(url_for('echec_inscription', error_message=error_message))
@@ -176,7 +173,7 @@ def index():
                 error_message = "Cette adresse e-mail est déjà utilisée."
                 return redirect(url_for('echec_inscription', error_message=error_message))
 
-            # 5. Création et ajout de l'inscription
+            # 6. Création et ajout de l'inscription
             nouvelle_inscription = Inscription(
                 nom=nom,
                 prenom=prenom,
@@ -185,7 +182,7 @@ def index():
                 email=email,
                 etablissement_actuel=etablissement_actuel,
                 niveau_etude=niveau_etude,
-                formation_principale=formation_principale, # NOUVEAU NOM DU CHAMP UTILISÉ
+                formation_principale=formation_principale,
                 formation_option=formation_option,
                 methode_paiement=methode_paiement,
                 date_soumission=datetime.now(),
@@ -197,17 +194,16 @@ def index():
             db.session.add(nouvelle_inscription)
             db.session.commit()
             
-            # 6. Redirection vers le succès
-            # Retrait du paramètre inscription_id inutile pour le succès
+            # 7. Redirection vers le succès
             return redirect(url_for('succes_inscription')) 
 
         except ValueError as e:
-            # Erreur de format de date
+            # Erreur de format de date ou autre
             error_message = f"Erreur de format des données : {str(e)}"
-            db.session.rollback() # S'assurer que la transaction est annulée en cas d'erreur de date
+            db.session.rollback()
             return redirect(url_for('echec_inscription', error_message=error_message))
         except Exception as e:
-            # Erreur d'enregistrement critique (doublon, base de données non existante, etc.)
+            # Erreur d'enregistrement critique (doublon DB, table manquante, etc.)
             db.session.rollback()
             error_message = f"Erreur d'enregistrement critique. Détail technique : {str(e)}"
             return redirect(url_for('echec_inscription', error_message=error_message))
@@ -226,10 +222,10 @@ def echec_inscription():
     return render_template('echec_inscription.html', error_message=error_message)
 
 # ====================================================
-# INITIALISATION DE LA BASE DE DONNÉES (Pour le local, la commande shell ne marche pas)
+# INITIALISATION DE LA BASE DE DONNÉES ET ADMIN (FIX RENDER)
 # ====================================================
 
-# Ceci est la commande CLI qui n'a pas fonctionné sur votre Render Shell
+# Commande CLI pour l'initialisation (si le shell fonctionne)
 @app.cli.command("init-db")
 def init_db():
     """Crée les tables de la base de données."""
@@ -237,8 +233,52 @@ def init_db():
         db.create_all()
         print('Base de données initialisée.')
 
-if __name__ == '__main__':
-    # Ceci est généralement utilisé pour le développement local
+def create_default_admin():
+    """Crée un utilisateur admin par défaut s'il n'existe pas."""
     with app.app_context():
-        db.create_all()
+        # Définir l'administrateur par défaut
+        ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'adminmanoor')
+        ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@manoor.com')
+        # TRES IMPORTANT: Changer ce mot de passe par défaut IMMEDIATEMENT après la première connexion
+        DEFAULT_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'ManPass2025') 
+        
+        if Admin.query.filter_by(username=ADMIN_USERNAME).first() is None:
+            print(f"INFO: Création de l'administrateur par défaut ({ADMIN_USERNAME}).")
+            hashed_password = generate_password_hash(DEFAULT_PASSWORD, method='pbkdf2:sha256')
+            new_admin = Admin(
+                username=ADMIN_USERNAME,
+                email=ADMIN_EMAIL,
+                password=hashed_password
+            )
+            db.session.add(new_admin)
+            db.session.commit()
+            print("INFO: Administrateur créé avec succès.")
+        else:
+            print("INFO: L'administrateur existe déjà.")
+
+
+def create_tables_if_not_exist():
+    """Force la création des tables au démarrage de l'application."""
+    with app.app_context():
+        # db.create_all() crée uniquement les tables manquantes.
+        # Cela ne fonctionne que si la base de données n'est pas complètement vide/non initialisée.
+        try:
+            # Tente de vérifier si une table existe, pour éviter de le faire sur un DB initialisé
+            Inscription.query.limit(1).all()
+            print("INFO: Les tables existent déjà. Pas de recréation.")
+        except Exception:
+            # Si la requête échoue (relation n'existe pas), on crée tout.
+            print("ATTENTION: Erreur de relation détectée. Création des tables...")
+            db.create_all()
+            print('INFO: Base de données initialisée via le démarrage de l\'application.')
+            # Exécuter la création de l'admin immédiatement après la création des tables
+            create_default_admin()
+
+
+# FORCER L'INITIALISATION AU DÉMARRAGE DE L'APPLICATION (Méthode la plus fiable sur Render)
+create_tables_if_not_exist()
+
+
+if __name__ == '__main__':
+    # Cette section n'est utilisée que pour le développement local
     app.run(debug=True)
