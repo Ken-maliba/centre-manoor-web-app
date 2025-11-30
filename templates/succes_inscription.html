@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-Inscription Réussie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Styles spécifiques pour la page de succès */
+        :root {
+            --color-success: #28a745;
+            --color-secondary: #007bff; /* Assurez-vous que cette couleur est définie dans votre style.css */
+        }
+        .success-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border-left: 5px solid var(--color-success);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            text-align: center;
+        }
+        .success-icon {
+            color: var(--color-success);
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .success-container h1 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .success-container p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .info-paiement {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e6ffe6; /* Vert très clair */
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            color: #155724;
+            text-align: left;
+        }
+        .btn-group {
+            margin-top: 30px;
+        }
+        .btn-group a {
+            padding: 10px 20px;
+            margin: 0 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: inline-block;
+        }
+        .btn-whatsapp {
+            background-color: #25d366; /* Vert WhatsApp */
+            color: white;
+            font-weight: bold;
+        }
+        .btn-whatsapp:hover {
+            background-color: #1da851;
+        }
+        .btn-return-home {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+        .btn-return-home:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✅</div>
+        <h1>Pré-Inscription Réussie !</h1>
+        <p>Félicitations ! Votre formulaire a été reçu par le Centre Manoor.</p>
+        
+        <div class="info-paiement">
+            <strong>Prochaine Étape : Paiement des Frais de Dossier</strong>
+            <p>Pour valider votre pré-inscription, vous devez payer les frais de dossier de <strong>5 000 F CFA</strong>.</p>
+            <p>Selon la méthode sélectionnée, veuillez procéder comme suit :</p>
+            
+            <ul>
+                <li><strong>Orange Money / Transfert Bancaire :</strong> Utilisez les coordonnées que l'administration vous a communiquées (ou contactez-nous via le bouton ci-dessous).</li>
+                <li><strong>Paiement sur Place :</strong> Vous serez contacté pour vous donner les modalités de passage au Centre Manoor.</li>
+            </ul>
+        </div>
+        
+        <p style="margin-top: 20px; font-weight: bold;">
+            Notre équipe vous contactera sous peu pour finaliser votre inscription.
+        </p>
+
+        <div class="btn-group">
+            <a href="https://wa.me/22373607241" target="_blank" class="btn-whatsapp">
+                📞 Contacter l'Administration (WhatsApp)
+            </a>
+            <a href="{{ url_for('index') }}" class="btn-return-home">Retour à l'Accueil</a>
+        </div>
+    </div>
+</body>
+</html>
