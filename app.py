@@ -90,7 +90,7 @@ class CustomAdminModelView(ModelView):
         return redirect(url_for('admin_login'))
 
 # Configuration Flask-Admin
-admin = FlaskAdmin(app, name='Administration Manoor', template_mode='bootstrap3', url='/admin')
+admin = FlaskAdmin(app, name='Administration Manoor', url='/admin')
 admin.add_view(CustomAdminModelView(Inscription, db.session, name="Inscriptions"))
 admin.add_view(CustomAdminModelView(Admin, db.session, name="Gestion Admins"))
 
