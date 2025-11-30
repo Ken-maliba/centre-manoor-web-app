@@ -422,6 +422,7 @@ def delete_inscription(inscription_id):
 # --- LANCEMENT DU SERVEUR ---
 if __name__ == '__main__':
     with app.app_context():
+        # Cette partie est essentielle, même si Gunicorn ne l'exécute pas toujours
         db.create_all() 
         create_default_admin()
         
