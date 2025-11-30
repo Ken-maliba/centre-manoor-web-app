@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur d'Inscription - Centre Manoor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        .error-container {
+            max-width: 650px;
+            margin: 80px auto;
+            padding: 40px;
+            background: #fff0f0;
+            border-left: 5px solid #dc3545; /* Rouge pour l'erreur */
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.1);
+            text-align: center;
+        }
+        .error-container h2 {
+            color: #dc3545;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        .error-container p {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        .action-links a {
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        .contact-link {
+            background-color: #dc3545; 
+            color: white;
+        }
+        .contact-link:hover {
+            background-color: #c82333;
+        }
+        .home-link-error {
+            background-color: #6c757d; 
+            color: white;
+        }
+        .home-link-error:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container section-padded">
+        <div class="error-container">
+            <h2>❌ Échec de la Pré-Inscription</h2>
+            <p>
+                Nous n'avons pas pu enregistrer votre dossier.
+            </p>
+            <p style="font-weight: bold; color: #dc3545;">
+                La raison la plus fréquente est que votre **numéro de téléphone** ou votre **adresse e-mail** est déjà utilisé(e) dans notre système pour une autre inscription.
+            </p>
+            
+            {% if error_message %}
+            <p style="color: #a00; font-style: italic;">
+                **Détail technique :** {{ error_message }}
+            </p>
+            {% else %}
+            <p>
+                Veuillez vérifier les informations que vous avez soumises. Si l'erreur persiste ou si vous pensez qu'il s'agit d'une erreur technique, veuillez contacter l'administration.
+            </p>
+            {% endif %}
+
+            <div class="action-links">
+                <a href="mailto:centremmanoor@gmail.com" class="contact-link">📧 Contacter l'Administration</a>
+                <a href="{{ url_for('index') }}" class="home-link-error">Retour au Formulaire</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
