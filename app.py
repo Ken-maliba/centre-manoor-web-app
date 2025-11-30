@@ -1,12 +1,21 @@
 # app.py
 
+import os
+from datetime import datetime
+
+# Importation des modules Flask et extensions
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
-from datetime import datetime
+
+# Charger les variables d'environnement si besoin (ex: localement avec python-dotenv)
+# Note: Render charge directement les variables d'environnement.
+# if os.path.exists('.env'):
+#     from dotenv import load_dotenv
+#     load_dotenv()
+
 
 # ====================================================
 # I. CONFIGURATION DE L'APPLICATION
@@ -15,7 +24,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # --- Configuration (Utilise .env localement ou variables Render en production) ---
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key_pour_test_local')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_cle_secrete_par_defaut')
 
 # Configuration de la Base de Données
 # Utilise DATABASE_URL (PostgreSQL) si défini (Render), sinon SQLite localement
@@ -32,7 +41,7 @@ app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('true', '1', 't')
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'centremmanoor@gmail.com')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'VotreMotDePasseApp')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'VotreMotDePasseAppMail') # Utiliser un mot de passe d'application si Gmail
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'centremmanoor@gmail.com')
 
 mail = Mail(app)
@@ -44,6 +53,7 @@ login_manager.login_view = 'admin_login'
 login_manager.login_message_category = 'danger'
 login_manager.login_message = "Veuillez vous connecter pour accéder à cette page."
 
+
 # ====================================================
 # II. MODÈLES DE BASE DE DONNÉES
 # ====================================================
@@ -54,7 +64,8 @@ class AdminUser(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password, method='scrypt')
+        # Utilisation de scrypt est plus sécuritaire que sha256
+        self.password_hash = generate_password_hash(password, method='scrypt') 
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -71,20 +82,20 @@ class Inscription(db.Model):
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
     date_naissance = db.Column(db.Date, nullable=False)
+    # Contraintes uniques pour prévenir les doublons
     telephone = db.Column(db.String(15), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     etablissement_actuel = db.Column(db.String(150), nullable=False)
     
     # Choix de Formation
-    formation_option = db.Column(db.String(50), nullable=False) # Ex: LGCGM, LCCM, ...
-    niveau_etude = db.Column(db.String(50), nullable=False)     # Ex: Licence, Master
+    formation_option = db.Column(db.String(50), nullable=False)
+    niveau_etude = db.Column(db.String(50), nullable=False)
     
     # Suivi et Validation
     date_soumission = db.Column(db.DateTime, default=datetime.utcnow)
-    # Champ booléen pour indiquer si l'inscription a été validée par l'admin
-    is_validated = db.Column(db.Boolean, default=False) 
-    methode_paiement = db.Column(db.String(50), nullable=True) # Ex: Orange Money, Virement
-    validation_date = db.Column(db.DateTime, nullable=True) # Date de la validation
+    is_validated = db.Column(db.Boolean, default=False)
+    methode_paiement = db.Column(db.String(50), nullable=True)
+    validation_date = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return f"Inscription('{self.nom}', '{self.prenom}', '{self.email}')"
@@ -94,8 +105,7 @@ class Inscription(db.Model):
 # III. INITIALISATION DE LA BASE DE DONNÉES (Méthode 2)
 # ====================================================
 
-# Crée les tables si elles n'existent pas. 
-# Ce bloc est exécuté au démarrage de l'application sur Render.
+# Ce bloc s'assure que les tables existent au démarrage de l'application.
 with app.app_context():
     db.create_all()
 
@@ -125,6 +135,7 @@ def send_validation_email(inscription):
         return True
     except Exception as e:
         print(f"Erreur lors de l'envoi de l'email : {e}")
+        # L'échec de l'envoi d'e-mail ne doit pas bloquer la transaction principale
         return False
 
 
@@ -136,24 +147,50 @@ def send_validation_email(inscription):
 def index():
     if request.method == 'POST':
         try:
-            # 1. Collecte des données du formulaire
-            nom = request.form['nom']
-            prenom = request.form['prenom']
-            date_naissance = datetime.strptime(request.form['date_naissance'], '%Y-%m-%d').date()
-            telephone = request.form['telephone'].replace(' ', '') # Nettoyage du numéro
-            email = request.form['email']
-            etablissement_actuel = request.form['etablissement_actuel']
-            formation_option = request.form['formation_option']
-            niveau_etude = request.form['niveau_etude']
-            methode_paiement = request.form['methode_paiement']
-
-            # 2. Vérification d'unicité (Flask-SQLAlchemy gère la violation UNIQUE, mais un check aide)
-            if Inscription.query.filter_by(telephone=telephone).first() or \
-               Inscription.query.filter_by(email=email).first():
-                flash('Ce numéro de téléphone ou cette adresse e-mail est déjà utilisé(e).', 'warning')
-                return redirect(url_for('echec_inscription', error_message='Données déjà enregistrées.'))
+            # --- 1. Collecte et validation des données du formulaire ---
+            data = request.form
             
-            # 3. Création de l'objet Inscription
+            # Liste des champs requis pour la validation initiale
+            required_fields = [
+                'nom', 'prenom', 'date_naissance', 'telephone', 'email', 
+                'etablissement_actuel', 'formation_option', 'niveau_etude', 'methode_paiement'
+            ]
+            
+            # Vérification si un champ obligatoire est vide
+            for field in required_fields:
+                if not data.get(field):
+                    # Génère une erreur personnalisée si un champ manque
+                    raise ValueError(f"Le champ '{field.replace('_', ' ')}' est manquant ou vide.")
+
+            # Extraction des données
+            nom = data.get('nom')
+            prenom = data.get('prenom')
+            
+            # Conversion de la date (point de plantage fréquent)
+            try:
+                date_naissance_str = data.get('date_naissance')
+                date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError("Format de la date de naissance invalide. Veuillez utiliser AAAA-MM-JJ.")
+
+            # Nettoyage et autres données
+            telephone = data.get('telephone').replace(' ', '')
+            email = data.get('email')
+            etablissement_actuel = data.get('etablissement_actuel')
+            formation_option = data.get('formation_option')
+            niveau_etude = data.get('niveau_etude')
+            methode_paiement = data.get('methode_paiement')
+
+
+            # --- 2. Vérification d'unicité (pour un message plus clair) ---
+            if Inscription.query.filter_by(telephone=telephone).first():
+                raise Exception(f"Ce numéro de téléphone ('{telephone}') est déjà utilisé(e).")
+            
+            if Inscription.query.filter_by(email=email).first():
+                raise Exception(f"Cette adresse e-mail ('{email}') est déjà utilisée.")
+            
+            
+            # --- 3. Création et Enregistrement dans la Base de Données ---
             new_inscription = Inscription(
                 nom=nom, prenom=prenom, date_naissance=date_naissance, 
                 telephone=telephone, email=email, 
@@ -163,23 +200,25 @@ def index():
                 methode_paiement=methode_paiement
             )
 
-            # 4. Enregistrement dans la base de données
             db.session.add(new_inscription)
             db.session.commit()
             
             inscription_id = new_inscription.id
 
-            # 5. Envoi de l'email de confirmation (Non bloquant)
+            # Envoi de l'email de confirmation (non bloquant)
             send_validation_email(new_inscription)
 
-            # 6. Redirection vers la page de succès
+            # Redirection vers la page de succès
             return redirect(url_for('succes_inscription', inscription_id=inscription_id))
 
+        
         except Exception as e:
-            # En cas d'erreur de base de données (ex: UniqueViolation non capturée, etc.)
+            # Gère les erreurs de validation (ValueError) ou les erreurs de base de données (IntegrityError, etc.)
             db.session.rollback()
-            print(f"Erreur d'enregistrement critique: {e}")
-            # Redirection vers la page d'échec avec un message
+            # Affiche l'erreur complète dans les logs de Render
+            print(f"Erreur d'enregistrement critique: {e}") 
+            
+            # Redirection vers la page d'échec avec le message d'erreur
             return redirect(url_for('echec_inscription', error_message=str(e)))
 
     # Pour la requête GET, afficher le formulaire principal
@@ -192,7 +231,8 @@ def succes_inscription():
 
 @app.route('/echec-inscription')
 def echec_inscription():
-    error_message = request.args.get('error_message', None)
+    # Récupère le message d'erreur passé dans l'URL
+    error_message = request.args.get('error_message', None) 
     return render_template('echec_inscription.html', error_message=error_message)
 
 
@@ -213,7 +253,6 @@ def admin_login():
         if user and user.check_password(password):
             login_user(user)
             flash('Connexion réussie.', 'success')
-            # Redirige vers la page d'où l'utilisateur venait, ou vers le tableau de bord
             next_page = request.args.get('next')
             return redirect(next_page or url_for('admin_dashboard'))
         else:
@@ -261,15 +300,14 @@ def inscription_details(inscription_id):
 def validate_inscription(inscription_id):
     inscription = Inscription.query.get_or_404(inscription_id)
     
-    # Bascule le statut de validation
     if not inscription.is_validated:
         inscription.is_validated = True
         inscription.validation_date = datetime.utcnow()
-        flash(f'Inscription #{inscription_id} (de {inscription.nom} {inscription.prenom}) marquée comme VALIDÉE.', 'success')
+        flash(f'Inscription #{inscription_id} validée.', 'success')
     else:
         inscription.is_validated = False
         inscription.validation_date = None
-        flash(f'Inscription #{inscription_id} (de {inscription.nom} {inscription.prenom}) marquée comme EN ATTENTE.', 'warning')
+        flash(f'Inscription #{inscription_id} remise en attente.', 'warning')
         
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
@@ -283,7 +321,7 @@ def delete_inscription(inscription_id):
     try:
         db.session.delete(inscription)
         db.session.commit()
-        flash(f'Inscription #{inscription_id} de {inscription.nom} {inscription.prenom} a été SUPPRIMÉE.', 'success')
+        flash(f'Inscription #{inscription_id} a été SUPPRIMÉE.', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'Erreur lors de la suppression: {e}', 'danger')
