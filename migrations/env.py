@@ -1,78 +1,61 @@
-from logging.config import fileConfig
+# A generic, single database configuration.
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+[alembic]
+# Path to migration scripts
+script_location = migrations
 
-from alembic import context
+# Template used to generate migration files
+# file_template = %%(rev)s_%%(slug)s
+# set to "true" to run the environment.py as a package
+# sqlalchemy.dialect = postgresql
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
-config = context.config
+# Logging configuration
+# Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+# logging_level = INFO
+# Logging file
+# log_file = alembic.log
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+[loggers]
+keys = root,sqlalchemy,alembic
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+[handlers]
+keys = console
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+[formatters]
+keys = generic
 
+[logger_root]
+level = WARN
+handlers = console
+qualname =
 
-def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
 
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
 
-    Calls to context.execute() here emit the given string to the
-    script output.
+[handler_console]
+class = StreamHandler
+args = (sys.stdout,)
+level = NOTSET
+formatter = generic
 
-    """
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
 
-    with context.begin_transaction():
-        context.run_migrations()
+# ====================================================
+# DATABASE CONNECTION
+# ====================================================
+# Pour Render : PostgreSQL
+# Tu peux choisir Internal ou External URL selon ton contexte
 
+# --- URL interne (si l'application est hébergée sur Render) ---
+sqlalchemy.url = postgresql://manoor_db_user:s6H9dQhbCbLEtH9pC7QaRhHdS11S6G4h@dpg-d4m5b7k9c44c73frj7ng-a:5432/manoor_db
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
-
-        with context.begin_transaction():
-            context.run_migrations()
-
-
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+# --- URL externe (si tu veux te connecter depuis ton PC local) ---
+# sqlalchemy.url = postgresql://manoor_db_user:s6H9dQhbCbLEtH9pC7QaRhHdS11S6G4h@dpg-d4m5b7k9c44c73frj7ng-a.oregon-postgres.render.com:5432/manoor_db
