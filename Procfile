@@ -1,1 +1,1 @@
-web: gunicorn app_v2:app
+web: gunicorn app:app
