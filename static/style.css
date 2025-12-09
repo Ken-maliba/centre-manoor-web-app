@@ -488,3 +488,31 @@ footer {
         height: 150px;
     }
 }
+/* ... Votre code CSS existant ... */
+
+/*
+ * ====================================================
+ * MESSAGES FLASH (Gérés par Flask)
+ * ====================================================
+ */
+.flash-message {
+    padding: 15px;
+    margin: 15px auto;
+    max-width: 600px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.flash-message.error {
+    background-color: #f8d7da; /* Rouge clair */
+    color: #721c24; /* Texte rouge foncé */
+    border: 1px solid #f5c6cb;
+}
+
+.flash-message.success {
+    background-color: #d4edda; /* Vert clair */
+    color: #155724; /* Texte vert foncé */
+    border: 1px solid #c3e5cb;
+}
