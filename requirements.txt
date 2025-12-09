@@ -1,9 +1,11 @@
+# Fichier: requirements.txt
 Flask
 Flask-SQLAlchemy
 Flask-Mail
 Flask-Login
+Flask-Admin
 gunicorn
 python-dotenv
 Werkzeug
 psycopg2-binary
-Flask-Admin
+alembic
